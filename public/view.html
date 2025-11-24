@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Post - Missed Connections</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>💌 Missed Connections</h1>
+      </div>
+    </header>
+
+    <nav>
+      <div class="container">
+        <a href="/">← Back to all posts</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section id="postDetail" class="post-detail">
+        <p class="loading">Loading post...</p>
+      </section>
+
+      <section id="replySection" class="reply-section" style="display: none">
+        <h2>Reply to this connection</h2>
+
+        <div class="privacy-notice">
+          <strong>🔒 Email verification required</strong>
+          <p>
+            We'll send a verification code to your email to confirm you own it
+            before sending your reply.
+          </p>
+        </div>
+
+        <!-- Step 1: Enter message and email -->
+        <form id="replyForm" style="display: block">
+          <div class="form-group">
+            <label for="message">Your message *</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              placeholder="Write your reply..."
+              required
+              minlength="10"
+              maxlength="1000"
+            ></textarea>
+            <small><span id="replyCharCount">0</span>/1000 characters</small>
+          </div>
+
+          <div class="form-group">
+            <label for="replyEmail">Your contact email *</label>
+            <input
+              type="email"
+              id="replyEmail"
+              name="replyEmail"
+              placeholder="your@email.com"
+              required
+            />
+            <small>They'll receive this so they can contact you directly</small>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Send Verification Code
+          </button>
+        </form>
+
+        <!-- Step 2: Enter verification code -->
+        <form id="verificationForm" style="display: none">
+          <div class="form-group">
+            <label for="verificationCode">Verification code *</label>
+            <input
+              type="text"
+              id="verificationCode"
+              name="verificationCode"
+              placeholder="000000"
+              maxlength="6"
+              pattern="[0-9]{6}"
+              required
+            />
+            <small
+              >Check your email for the 6-digit code (expires in 15
+              minutes)</small
+            >
+          </div>
+
+          <button type="submit" class="btn-primary">Verify & Send Reply</button>
+          <button type="button" id="resendCode" class="btn-secondary">
+            Resend Code
+          </button>
+        </form>
+
+        <div id="replySuccess" class="success-message" style="display: none">
+          <h3>✨ Reply sent!</h3>
+          <p>
+            The poster will receive your message and contact info. Good luck!
+          </p>
+        </div>
+
+        <div id="replyError" class="error-message" style="display: none"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>Privacy-focused • No tracking • Auto-expiring posts</p>
+      </div>
+    </footer>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Report Post</h2>
+
+        <p>
+          Help us keep Shy Porcupine safe. Your report is completely anonymous.
+        </p>
+
+        <form id="reportForm">
+          <div class="form-group">
+            <label>Why are you reporting this?</label>
+            <select id="reportReason" required>
+              <option value="">Select a reason...</option>
+              <option value="spam">Spam or advertising</option>
+              <option value="harassment">Harassment or bullying</option>
+              <option value="inappropriate">Inappropriate content</option>
+              <option value="scam">Scam or fraud</option>
+              <option value="fake">Fake or misleading</option>
+              <option value="offensive">Offensive or hateful</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Additional details (optional)</label>
+            <textarea
+              id="reportDetails"
+              maxlength="500"
+              rows="4"
+              placeholder="Help us understand the issue..."
+            ></textarea>
+            <small><span id="detailsCount">0</span>/500 characters</small>
+          </div>
+
+          <button type="submit" class="btn-danger">Submit Report</button>
+          <button type="button" class="btn-secondary" id="cancelReport">
+            Cancel
+          </button>
+        </form>
+
+        <div id="reportSuccess" style="display: none">
+          <p>✓ Thank you for your report. We'll review it shortly.</p>
+          <button class="btn-secondary" id="closeModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="/scripts/auth.js"></script>
+    <script type="text/javascript" src="/scripts/view.js"></script>
+  </body>
+</html>

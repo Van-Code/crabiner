@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post a Missed Connection</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-emoji">🦔💕</span>
+            <span class="logo-text">Shy Porcupine</span>
+          </a>
+        </div>
+
+        <div class="nav-links">
+          <a href="/browse.html" class="nav-link">Browse</a>
+          <a href="/guidelines.html" class="nav-link">Guidelines</a>
+
+          <div id="authSection" class="auth-section">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="form-section">
+        <h2>Share Your Story</h2>
+
+        <div class="privacy-notice">
+          <strong>🔒 Your privacy matters</strong>
+          <ul>
+            <li>Your email is never displayed publicly</li>
+            <li>Replies are forwarded to you securely</li>
+            <li>Posts auto-delete after 7-30 days</li>
+            <li>You'll get a link to delete early if needed</li>
+          </ul>
+        </div>
+
+        <form id="postForm">
+          <div class="form-group">
+            <label for="location">Where did you see them? *</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              placeholder="e.g., The Castro, SF"
+              required
+              maxlength="100"
+            />
+            <small>General area only - no exact addresses</small>
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category">
+              <option value="other">Other</option>
+              <option value="coffee-shop">Coffee Shop</option>
+              <option value="transit">Transit (bus, train, etc)</option>
+              <option value="bar">Bar/Club</option>
+              <option value="bookstore">Bookstore</option>
+              <option value="gym">Gym</option>
+              <option value="event">Event</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Your story *</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="6"
+              placeholder="Tell your story... What were they wearing? What caught your eye? What do you wish you'd said?"
+              required
+              minlength="10"
+              maxlength="2000"
+            ></textarea>
+            <small><span id="charCount">0</span>/2000 characters</small>
+          </div>
+
+          <!-- <div class="form-group">
+            <label for="contactEmail">Your contact email *</label>
+            <input
+              type="email"
+              id="contactEmail"
+              name="contactEmail"
+              placeholder="your@email.com"
+              required
+            />
+            <small>We'll send replies here. Never shown publicly.</small>
+          </div> -->
+
+          <div class="form-group">
+            <label for="expiresInDays">Post expires in</label>
+            <select id="expiresInDays" name="expiresInDays">
+              <option value="7">7 days</option>
+              <option value="14" selected>14 days (recommended)</option>
+              <option value="21">21 days</option>
+              <option value="30">30 days</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary">Post My Connection</button>
+        </form>
+
+        <div id="successMessage" class="success-message" style="display: none">
+          <h3>✨ Posted successfully!</h3>
+
+          <div class="privacy-notice">
+            <strong>📧 Get your inbox link via email</strong>
+            <p>
+              We can email you the link to check for replies. This way you won't
+              lose it!
+            </p>
+          </div>
+
+          <form id="emailLinkForm">
+            <div class="form-group">
+              <label for="posterEmail">Your email</label>
+              <input
+                type="email"
+                id="posterEmail"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 0.5rem">
+                <input type="checkbox" id="notifyOnReply" checked />
+                <span>Email me when someone replies</span>
+              </label>
+              <small
+                >We'll notify you when you get a reply so you don't have to keep
+                checking</small
+              >
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Send Verification Code
+            </button>
+            <button type="button" id="skipEmail" class="btn-secondary">
+              Skip (Show Link Now)
+            </button>
+          </form>
+
+          <!-- Verification step -->
+          <form id="posterVerificationForm" style="display: none">
+            <div class="form-group">
+              <label for="posterCode">Verification code</label>
+              <input
+                type="text"
+                id="posterCode"
+                placeholder="000000"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required
+              />
+              <small>Check your email for the 6-digit code</small>
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Verify & Send Link
+            </button>
+            <button type="button" id="resendPosterCode" class="btn-secondary">
+              Resend Code
+            </button>
+          </form>
+
+          <!-- Email sent confirmation -->
+          <div id="emailSentConfirmation" style="display: none">
+            <div class="privacy-notice">
+              <strong>✓ Email sent!</strong>
+              <p>
+                Check your email for the inbox link. We've sent it to your
+                verified address.
+              </p>
+            </div>
+            <a href="/" class="btn-secondary">View all posts</a>
+          </div>
+
+          <!-- Manual inbox link (if skipped email) -->
+          <div id="manualInboxLink" style="display: none">
+            <div style="margin: 1rem 0">
+              <a
+                href="#"
+                id="inboxLinkButton"
+                class="btn-primary"
+                target="_blank"
+                >Open My Inbox</a
+              >
+            </div>
+            <div class="privacy-notice">
+              <strong>📌 IMPORTANT: Save this link!</strong>
+              <input
+                type="text"
+                id="inboxLinkText"
+                readonly
+                style="
+                  width: 100%;
+                  padding: 0.5rem;
+                  margin-top: 0.5rem;
+                  font-family: monospace;
+                  font-size: 0.9rem;
+                "
+                onclick="this.select()"
+              />
+              <p style="margin-top: 0.5rem">
+                Bookmark it or copy it - this is your only way to see replies!
+              </p>
+            </div>
+            <a href="/" class="btn-secondary">View all posts</a>
+          </div>
+        </div>
+
+        <div
+          id="errorMessage"
+          class="error-message"
+          style="display: none"
+        ></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>🦔 Shy Porcupine</h4>
+            <p>A safe space for sapphic missed connections</p>
+
+            <!-- Ko-fi button -->
+            <div class="kofi-container">
+              <a href="https://ko-fi.com/W7W71P0PEN" target="_blank">
+                <img
+                  height="36"
+                  style="border: 0px; height: 36px"
+                  src="https://storage.ko-fi.com/cdn/kofi4.png?v=6"
+                  border="0"
+                  alt="Buy Me a Coffee at ko-fi.com"
+                />
+              </a>
+              <p class="kofi-text">Help keep this site running! ☕</p>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="/browse.html">Browse Posts</a>
+            <a href="/post.html">Post a Connection</a>
+            <a href="/guidelines.html">Community Guidelines</a>
+          </div>
+
+          <div class="footer-section">
+            <h4>About</h4>
+            <p>Privacy-focused • No tracking • Auto-expiring posts</p>
+            <p>Made with 💕 for the sapphic community</p>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Shy Porcupine. Built with care for queer women &
+            nonbinary folks. 🏳️‍🌈
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script type="text/javascript" src="/scripts/auth.js"></script>
+    <script type="text/javascript" src="/scripts/post.js"></script>
+  </body>
+</html>

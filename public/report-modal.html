@@ -1,0 +1,46 @@
+<!-- Report Modal -->
+<div id="reportModal" class="modal" style="display: none">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Report Post</h2>
+
+    <p>Help us keep Shy Porcupine safe. Your report is completely anonymous.</p>
+
+    <form id="reportForm">
+      <div class="form-group">
+        <label>Why are you reporting this?</label>
+        <select id="reportReason" required>
+          <option value="">Select a reason...</option>
+          <option value="spam">Spam or advertising</option>
+          <option value="harassment">Harassment or bullying</option>
+          <option value="inappropriate">Inappropriate content</option>
+          <option value="scam">Scam or fraud</option>
+          <option value="fake">Fake or misleading</option>
+          <option value="offensive">Offensive or hateful</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Additional details (optional)</label>
+        <textarea
+          id="reportDetails"
+          maxlength="500"
+          rows="4"
+          placeholder="Help us understand the issue..."
+        ></textarea>
+        <small><span id="detailsCount">0</span>/500 characters</small>
+      </div>
+
+      <button type="submit" class="btn-danger">Submit Report</button>
+      <button type="button" class="btn-secondary" id="cancelReport">
+        Cancel
+      </button>
+    </form>
+
+    <div id="reportSuccess" style="display: none">
+      <p>✓ Thank you for your report. We'll review it shortly.</p>
+      <button class="btn-secondary" id="closeModal">Close</button>
+    </div>
+  </div>
+</div>

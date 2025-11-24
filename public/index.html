@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shy Porcupine - Missed Connections for Sapphics</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-emoji">🦔💕</span>
+            <span class="logo-text">Shy Porcupine</span>
+          </a>
+        </div>
+
+        <div class="nav-links">
+          <a href="/browse.html" class="nav-link">Browse</a>
+          <a href="/guidelines.html" class="nav-link">Guidelines</a>
+
+          <div id="authSection" class="auth-section">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            <span class="wave">👋</span> Did you see someone special?
+          </h1>
+          <p class="hero-subtitle">
+            A cozy corner of the internet for sapphic missed connections
+          </p>
+          <p class="hero-description">
+            For queer women & nonbinary folks who saw someone cute but were too
+            shy to say hi 🌈
+          </p>
+
+          <div class="hero-buttons">
+            <a href="/browse.html" class="btn-primary-large">
+              <span>✨</span> Browse Posts
+            </a>
+            <a href="/post.html" class="btn-secondary-large">
+              <span>💌</span> Post Your Connection
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-graphic">
+          <div class="graphic-container">
+            <div class="porcupine-left">🦔</div>
+            <div class="hearts">
+              <span class="heart">💕</span>
+              <span class="heart">💗</span>
+              <span class="heart">💖</span>
+            </div>
+            <div class="porcupine-right">🦔</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+      <div class="container">
+        <h2 class="section-title">How it works 🌟</h2>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-icon">👀</div>
+            <h3>You saw someone</h3>
+            <p>
+              At a coffee shop, on the train, at a bookstore... somewhere in the
+              real world
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-icon">✍️</div>
+            <h3>Post your story</h3>
+            <p>Share what you noticed about them. Be specific but sweet!</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-icon">🔔</div>
+            <h3>They might reply</h3>
+            <p>
+              If they see your post, they can message you privately through the
+              app
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-icon">☕</div>
+            <h3>Connect IRL</h3>
+            <p>Exchange info and maybe grab coffee together!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Why Shy Porcupine? 🦔</h2>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🏳️‍🌈</div>
+            <h3>Sapphic-Only Space</h3>
+            <p>
+              Built by and for queer women & nonbinary folks. No men allowed,
+              period.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Privacy First</h3>
+            <p>
+              No tracking, minimal data collection, anonymous posting. Your
+              privacy matters.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>In-App Messaging</h3>
+            <p>Messages go to your private inbox. No email relay needed.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">⏰</div>
+            <h3>Auto-Expiring</h3>
+            <p>
+              Posts delete automatically after 7-30 days. Fresh content always.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Safe & Moderated</h3>
+            <p>Report inappropriate posts. Community-driven safety.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">✨</div>
+            <h3>No Accounts Required</h3>
+            <p>Post anonymously or sign in with Google for extra features.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Posts Preview -->
+    <section class="recent-posts-preview">
+      <div class="container">
+        <h2 class="section-title">Recent connections 💕</h2>
+        <p class="section-subtitle">See who's looking for someone special...</p>
+
+        <div id="recentPostsGrid" class="preview-grid">
+          <p class="loading">Loading recent posts...</p>
+        </div>
+
+        <div class="text-center">
+          <a href="/browse.html" class="btn-primary">View All Posts →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-content">
+          <h2>Ready to reconnect? 🌈</h2>
+          <p>Post your missed connection and see if they find you!</p>
+          <a href="/post.html" class="btn-cta"> 💌 Post Your Connection </a>
+          <p class="cta-note">Free • Anonymous • Safe</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- After the CTA section, before footer -->
+    <section class="support-section">
+      <div class="container">
+        <div class="support-content">
+          <h3>💕 Support Shy Porcupine</h3>
+          <p>
+            This site is free and ad-free. If you'd like to support development
+            and hosting costs:
+          </p>
+          <a
+            href="https://ko-fi.com/W7W71P0PEN"
+            target="_blank"
+            class="kofi-cta"
+          >
+            <img
+              height="36"
+              style="border: 0px; height: 36px"
+              src="https://storage.ko-fi.com/cdn/kofi4.png?v=6"
+              border="0"
+              alt="Buy Me a Coffee at ko-fi.com"
+            />
+          </a>
+          <p class="support-note">
+            Every coffee helps keep this sapphic space alive! ☕🦔
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>🦔 Shy Porcupine</h4>
+            <p>A safe space for sapphic missed connections</p>
+
+            <!-- Ko-fi button -->
+            <div class="kofi-container">
+              <a href="https://ko-fi.com/W7W71P0PEN" target="_blank">
+                <img
+                  height="36"
+                  style="border: 0px; height: 36px"
+                  src="https://storage.ko-fi.com/cdn/kofi4.png?v=6"
+                  border="0"
+                  alt="Buy Me a Coffee at ko-fi.com"
+                />
+              </a>
+              <p class="kofi-text">Help keep this site running! ☕</p>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="/browse.html">Browse Posts</a>
+            <a href="/post.html">Post a Connection</a>
+            <a href="/guidelines.html">Community Guidelines</a>
+          </div>
+
+          <div class="footer-section">
+            <h4>About</h4>
+            <p>Privacy-focused • No tracking • Auto-expiring posts</p>
+            <p>Made with 💕 for the sapphic community</p>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Shy Porcupine. Built with care for queer women &
+            nonbinary folks. 🏳️‍🌈
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/scripts/auth.js"></script>
+    <script src="/scripts/landing.js"></script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Inbox - Missed Connections</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-emoji">🦔💕</span>
+            <span class="logo-text">Shy Porcupine</span>
+          </a>
+        </div>
+
+        <div class="nav-links">
+          <a href="/browse.html" class="nav-link">Browse</a>
+          <a href="/guidelines.html" class="nav-link">Guidelines</a>
+
+          <div id="authSection" class="auth-section">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+      <section class="inbox-section">
+        <div id="postInfo" class="post-info"></div>
+
+        <div class="inbox-header">
+          <h2>Messages</h2>
+          <span
+            id="unreadBadge"
+            class="unread-badge"
+            style="display: none"
+          ></span>
+        </div>
+
+        <div id="messages" class="messages-list">
+          <p class="loading">Loading messages...</p>
+        </div>
+        <div
+          id="replyToMessageForm"
+          class="reply-to-message-form"
+          style="display: none"
+        >
+          <h3>Reply to message</h3>
+          <form id="posterReplyForm">
+            <div class="form-group">
+              <label>Your response</label>
+              <textarea
+                id="posterReplyMessage"
+                rows="3"
+                maxlength="1000"
+                required
+              ></textarea>
+              <small
+                ><span id="posterReplyCount">0</span>/1000 characters</small
+              >
+            </div>
+            <button type="submit" class="btn-primary">Send Reply</button>
+            <button type="button" class="btn-secondary" id="cancelPosterReply">
+              Cancel
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>🦔 Shy Porcupine</h4>
+            <p>A safe space for sapphic missed connections</p>
+
+            <!-- Ko-fi button -->
+            <div class="kofi-container">
+              <a href="https://ko-fi.com/W7W71P0PEN" target="_blank">
+                <img
+                  height="36"
+                  style="border: 0px; height: 36px"
+                  src="https://storage.ko-fi.com/cdn/kofi4.png?v=6"
+                  border="0"
+                  alt="Buy Me a Coffee at ko-fi.com"
+                />
+              </a>
+              <p class="kofi-text">Help keep this site running! ☕</p>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="/browse.html">Browse Posts</a>
+            <a href="/post.html">Post a Connection</a>
+            <a href="/guidelines.html">Community Guidelines</a>
+          </div>
+
+          <div class="footer-section">
+            <h4>About</h4>
+            <p>Privacy-focused • No tracking • Auto-expiring posts</p>
+            <p>Made with 💕 for the sapphic community</p>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Shy Porcupine. Built with care for queer women &
+            nonbinary folks. 🏳️‍🌈
+          </p>
+        </div>
+      </div>
+    </footer>
+    <script type="text/javascript" src="/scripts/auth.js"></script>
+    <script type="text/javascript" src="/scripts/inbox.js"></script>
+  </body>
+</html>

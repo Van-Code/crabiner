@@ -192,8 +192,8 @@ async function start() {
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${config.nodeEnv}`);
-      logger.info("Shy Porcupine API ready");
-      console.log("\n🦔💕 Shy Porcupine is running!");
+      logger.info("Crabiner API ready");
+      console.log("\n🦀🔗 Crabiner is running!");
       console.log(`Visit: http://localhost:${PORT}\n`);
     });
   } catch (error) {

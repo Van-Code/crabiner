@@ -1,8 +1,8 @@
-# 🦔💕 Shy Porcupine
+# 🦀🔗 Crabiner
 
 A privacy-focused, safe space for **sapphic women and nonbinary people** to post and respond to missed connections. Built with security, anonymity, and community safety as top priorities.
 
-> **This is a sapphic-only space.** Shy Porcupine is exclusively for queer women, lesbians, and nonbinary folks seeking connections with other sapphics.
+> **This is a sapphic-only space.** Crabiner is exclusively for queer women, lesbians, and nonbinary folks seeking connections with other sapphics.
 
 ---
 
@@ -53,7 +53,7 @@ A privacy-focused, safe space for **sapphic women and nonbinary people** to post
 
 ## 🏳️‍🌈 Who Is This For?
 
-**Shy Porcupine is exclusively for:**
+**Crabiner is exclusively for:**
 
 - Queer women (lesbians, bisexual women, pansexual women, etc.)
 - Nonbinary people attracted to women/sapphics
@@ -111,7 +111,7 @@ If you're not sure if this space is for you, ask yourself: "Am I a sapphic perso
 
 ```bash
 git clone <your-repo-url>
-cd shy-porcupine
+cd crabiner
 npm install
 ```
 
@@ -161,12 +161,12 @@ SMTP_HOST=email-smtp.us-east-1.amazonaws.com
 SMTP_PORT=587
 SMTP_USER=your_aws_smtp_username
 SMTP_PASS=your_aws_smtp_password
-SMTP_FROM=noreply@shyporcupine.com
-RELAY_DOMAIN=shyporcupine.com
+SMTP_FROM=noreply@crabiner.com
+RELAY_DOMAIN=crabiner.com
 
 # Security (generate random 32+ character string)
 ENCRYPTION_KEY=your_32_byte_encryption_key_here_change_this
-ALLOWED_ORIGINS=https://shyporcupine.com,http://localhost:3000
+ALLOWED_ORIGINS=https://crabiner.com,http://localhost:3000
 
 # Rate Limiting
 MAX_POSTS_PER_DAY=5
@@ -196,7 +196,7 @@ Visit http://localhost:3000
 
 ```bash
 npm install -g pm2
-pm2 start src/server.js --name shy-porcupine
+pm2 start src/server.js --name crabiner
 pm2 startup
 pm2 save
 ```
@@ -206,16 +206,16 @@ pm2 save
 ```nginx
 server {
     listen 80;
-    server_name shyporcupine.com;
+    server_name crabiner.com;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name shyporcupine.com;
+    server_name crabiner.com;
 
-    ssl_certificate /etc/letsencrypt/live/shyporcupine.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/shyporcupine.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/crabiner.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/crabiner.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -231,7 +231,7 @@ server {
 Get SSL certificate:
 
 ```bash
-sudo certbot --nginx -d shyporcupine.com
+sudo certbot --nginx -d crabiner.com
 ```
 
 ---
@@ -397,6 +397,6 @@ Built with care for the sapphic community. Special thanks to everyone who believ
 
 For issues, questions, or suggestions, please open a GitHub issue.
 
-**Remember:** This platform is about connection, consent, and community. Please use it respectfully and help keep it safe for everyone. 🦔💕🏳️‍🌈
+**Remember:** This platform is about connection, consent, and community. Please use it respectfully and help keep it safe for everyone. 🦀🔗🏳️‍🌈
 
 ---

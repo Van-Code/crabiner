@@ -28,7 +28,7 @@ router.get(
       const { q, page = 1, location, category } = req.query;
 
       const results = await searchPosts({
-        query: q,
+        queryString: q,
         page: parseInt(page),
         location,
         category,
@@ -71,13 +71,15 @@ router.get(
   "/",
   query("page").optional().isInt({ min: 1 }),
   query("location").optional().trim().isLength({ max: 100 }),
+  query("category").optional().trim(), // Add this
   validateRequest,
   async (req, res, next) => {
     try {
-      const { page = 1, location } = req.query;
+      const { page = 1, location, category } = req.query;
       const posts = await getPosts({
         page: parseInt(page),
         location,
+        category, // Add this
       });
       res.json(posts);
     } catch (error) {

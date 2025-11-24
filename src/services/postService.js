@@ -71,7 +71,12 @@ export async function createPost(data) {
   };
 }
 
-export async function getPosts({ page = 1, location = null, limit = 20 }) {
+export async function getPosts({
+  page = 1,
+  location = null,
+  category = null,
+  limit = 20,
+}) {
   const offset = (page - 1) * limit;
   const now = new Date();
 
@@ -83,15 +88,21 @@ export async function getPosts({ page = 1, location = null, limit = 20 }) {
   `;
 
   const params = [now];
+  let paramCount = 1;
 
   if (location) {
-    queryText += ` AND location ILIKE $${params.length + 1}`;
+    queryText += ` AND location ILIKE $${++paramCount}`;
     params.push(`%${location}%`);
+  }
+  // Add category filter
+  if (category) {
+    queryText += ` AND category = $${++paramCount}`;
+    params.push(category);
   }
 
   queryText += `
     ORDER BY posted_at DESC
-    LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    LIMIT $${++paramCount} OFFSET $${++paramCount}
   `;
 
   params.push(limit, offset);
@@ -161,7 +172,7 @@ export async function getPostBySessionToken(sessionToken) {
 }
 
 export async function searchPosts({
-  query,
+  queryString,
   page = 1,
   location = null,
   category = null,
@@ -172,25 +183,25 @@ export async function searchPosts({
 
   let queryText = `
     SELECT id, location, category, description, posted_at, expires_at,
-           ts_rank(to_tsvector('english', description || ' ' || location), 
-                   plainto_tsquery('english', $1)) as rank
+      ts_rank(to_tsvector('english', description || ' ' || location), 
+      plainto_tsquery('english', $1)) as rank
     FROM posts
     WHERE is_deleted = FALSE 
       AND expires_at > $2
   `;
 
-  const params = [query, now];
+  const params = [queryString, now];
   let paramCount = 2;
 
   // Add search condition
-  if (query && query.trim()) {
+  if (queryString && queryString.trim()) {
     queryText += ` AND (
       to_tsvector('english', description) @@ plainto_tsquery('english', $1)
       OR to_tsvector('english', location) @@ plainto_tsquery('english', $1)
       OR description ILIKE $${++paramCount}
       OR location ILIKE $${paramCount}
     )`;
-    params.push(`%${query}%`);
+    params.push(`%${queryString}%`);
   }
 
   // Add location filter
@@ -215,10 +226,10 @@ export async function searchPosts({
   const result = await query(queryText, params);
 
   // Log search query
-  if (query && query.trim()) {
+  if (queryString && queryString.trim()) {
     await query(
       `INSERT INTO search_queries (query, results_count) VALUES ($1, $2)`,
-      [query, result.rows.length]
+      [queryString, result.rows.length]
     );
   }
 
@@ -226,7 +237,7 @@ export async function searchPosts({
     posts: result.rows,
     page,
     hasMore: result.rows.length === limit,
-    query: query || null,
+    queryString: queryString || null,
   };
 }
 

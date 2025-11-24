@@ -25,78 +25,83 @@ document.addEventListener("DOMContentLoaded", () => {
       filterBtn.click();
     }
   });
+
   // Search button click
-  searchBtn.addEventListener("click", () => {
-    currentSearchQuery = searchQuery.value.trim();
-    currentLocation = locationFilter.value.trim();
-    currentCategory = categoryFilter.value;
-    currentPage = 1;
-    loadPosts();
-  });
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      currentSearchQuery = searchQuery.value.trim();
+      currentLocation = locationFilter.value.trim();
+      currentCategory = categoryFilter.value; // Get category value
+      currentPage = 1;
+
+      console.log("Search clicked:", {
+        // Debug log
+        query: currentSearchQuery,
+        location: currentLocation,
+        category: currentCategory,
+      });
+
+      loadPosts();
+    });
+  }
+
+  // Filter button click (if you have a separate filter button)
+  if (filterBtn) {
+    filterBtn.addEventListener("click", () => {
+      currentLocation = locationFilter.value.trim();
+      currentCategory = categoryFilter.value; // Get category value
+      currentPage = 1;
+
+      console.log("Filter clicked:", {
+        // Debug log
+        location: currentLocation,
+        category: currentCategory,
+      });
+
+      loadPosts();
+    });
+  }
 
   // Clear button
-  clearBtn.addEventListener("click", () => {
-    searchQuery.value = "";
-    locationFilter.value = "";
-    categoryFilter.value = "";
-    currentSearchQuery = "";
-    currentLocation = "";
-    currentCategory = "";
-    currentPage = 1;
-    loadPosts();
-  });
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      searchQuery.value = "";
+      locationFilter.value = "";
+      categoryFilter.value = ""; // Clear category
+      currentSearchQuery = "";
+      currentLocation = "";
+      currentCategory = "";
+      currentPage = 1;
+      loadPosts();
+    });
+  }
 
   // Enter key on search
-  searchQuery.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      searchBtn.click();
-    }
-  });
+  if (searchQuery) {
+    searchQuery.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchBtn.click();
+      }
+    });
+  }
 
   // Pagination
-  prevPageBtn.addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--;
-      loadPosts();
-    }
-  });
-
-  nextPageBtn.addEventListener("click", () => {
-    currentPage++;
-    loadPosts();
-  });
-});
-
-// Load posts from API
-async function loadPosts() {
-  postsContainer.innerHTML = '<p class="loading">Loading posts...</p>';
-
-  try {
-    const params = new URLSearchParams({
-      page: currentPage,
+  if (prevPageBtn) {
+    prevPageBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadPosts();
+      }
     });
-
-    if (currentLocation) {
-      params.append("location", currentLocation);
-    }
-    const response = await fetch(`/api/posts?${params}`);
-
-    if (!response.ok) {
-      throw new Error("Failed to load posts");
-    }
-
-    const data = await response.json();
-
-    displayPosts(data.posts);
-    updatePagination(data.hasMore);
-  } catch (error) {
-    postsContainer.innerHTML = `
-      <div class="error-message">
-        <p>Failed to load posts. Please try again.</p>
-      </div>
-    `;
   }
-}
+
+  if (nextPageBtn) {
+    nextPageBtn.addEventListener("click", () => {
+      currentPage++;
+      loadPosts();
+    });
+  }
+});
 
 // Display posts in grid
 function displayPosts(posts) {
@@ -234,6 +239,12 @@ async function loadPopularSearches() {
 async function loadPosts() {
   postsContainer.innerHTML = '<p class="loading">Loading posts...</p>';
 
+  // Remove previous search results count if it exists
+  const existingCount = document.querySelector(".search-results-count");
+  if (existingCount) {
+    existingCount.remove();
+  }
+
   try {
     let endpoint = "/api/posts";
     const params = new URLSearchParams({ page: currentPage });
@@ -249,33 +260,46 @@ async function loadPosts() {
 
     if (currentCategory) {
       params.append("category", currentCategory);
+      console.log("Adding category param:", currentCategory); // Debug log
     }
 
-    const response = await fetch(`${endpoint}?${params}`);
+    const finalUrl = `${endpoint}?${params}`;
+    console.log("Fetching:", finalUrl); // Debug log
+
+    const response = await fetch(finalUrl);
 
     if (!response.ok) {
       throw new Error("Failed to load posts");
     }
 
     const data = await response.json();
+    console.log("Received posts:", data.posts.length); // Debug log
 
     displayPosts(data.posts);
     updatePagination(data.hasMore);
 
-    // Show search results count
-    if (currentSearchQuery) {
+    /// Show search results count
+    if (currentSearchQuery || currentLocation || currentCategory) {
+      const filters = [];
+      if (currentSearchQuery) filters.push(`"${currentSearchQuery}"`);
+      if (currentLocation) filters.push(`location: ${currentLocation}`);
+      if (currentCategory) filters.push(`category: ${currentCategory}`);
+
       const resultsText =
         data.posts.length === 0
           ? "No results found"
           : `Found ${data.posts.length} result${
               data.posts.length === 1 ? "" : "s"
             }`;
-      postsContainer.insertAdjacentHTML(
-        "beforebegin",
-        `<p class="search-results-count">${resultsText} for "${currentSearchQuery}"</p>`
-      );
+
+      const countElement = document.createElement("p");
+      countElement.className = "search-results-count";
+      countElement.textContent = `${resultsText} for ${filters.join(", ")}`;
+
+      postsContainer.parentElement.insertBefore(countElement, postsContainer);
     }
   } catch (error) {
+    console.error("Load posts error:", error);
     postsContainer.innerHTML = `
       <div class="error-message">
         <p>Failed to load posts. Please try again.</p>

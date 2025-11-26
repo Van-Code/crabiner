@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 
 const client = new Client({
-  connectionString: "postgresql://van:pool@localhost:5432/missed_connections",
+  connectionString: process.env.DATABASE_URL,
 });
 
 const locations = [

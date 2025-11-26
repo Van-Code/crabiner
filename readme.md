@@ -1,8 +1,8 @@
-# 🦔💕 Shy Porcupine
+# 🦔💕 Crabiner
 
 A privacy-focused, safe space for **sapphic women and nonbinary people** to post and respond to missed connections. Built with security, anonymity, and community safety as top priorities.
 
-> **This is a sapphic-only space.** Shy Porcupine is exclusively for queer women, lesbians, and nonbinary folks seeking connections with other sapphics.
+> **This is a sapphic-only space.** Crabiner is exclusively for queer women, lesbians, and nonbinary folks seeking connections with other sapphics.
 
 ---
 
@@ -53,7 +53,7 @@ A privacy-focused, safe space for **sapphic women and nonbinary people** to post
 
 ## 🏳️‍🌈 Who Is This For?
 
-**Shy Porcupine is exclusively for:**
+**Crabiner is exclusively for:**
 
 - Queer women (lesbians, bisexual women, pansexual women, etc.)
 - Nonbinary people attracted to women/sapphics

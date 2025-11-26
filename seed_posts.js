@@ -64,7 +64,7 @@ const descriptions = [
   "Farmers market on Sunday. We reached for the same bunch of flowers and laughed. You were wearing overalls.",
   "You complimented my shirt and we ended up talking about our favorite bands for 20 minutes. Kicked myself for not asking for your number.",
   "Movie theater last Friday. We were the only two people who stayed for the post-credits scene. We should watch movies together.",
-  "You were running with your dog along the waterfront. We said hi as you passed. Your dog was adorable and so were you.",
+  "You were running with your dog along the Embarcadero. We said hi as you passed. Your dog was adorable and so were you.",
   "Bookstore poetry section. You recommended Mary Oliver and we talked about favorite poems. I think about that conversation a lot.",
   "Coffee shop regular with the laptop covered in stickers. We always seem to be there at the same time. Want to actually talk?",
   "We were both at the drag show and kept catching each other's eye. You were wearing a leather jacket.",
@@ -82,7 +82,7 @@ const descriptions = [
   "You gave an amazing presentation at the conference. I wanted to introduce myself but you were surrounded by people.",
   "Karaoke night. You sang my favorite song perfectly. I was too shy to go up after you.",
   "We were both at the cat cafe. You were gentle with all the cats and it was adorable.",
-  "Bike ride along the waterfront. We biked at the same pace for a while and exchanged smiles.",
+  "Bike ride along the Embarcadero. We biked at the same pace for a while and exchanged smiles.",
   "Food truck line. We talked about our favorite foods and laughed about how long the wait was.",
   "You were painting at the lookout point. I wanted to see your work but didn't want to disturb you.",
   "Community garden. We were both tending our plots. You gave me advice about growing tomatoes.",
@@ -92,8 +92,8 @@ const descriptions = [
   "Meditation class. You have such a calming presence. Would love to grab tea and talk.",
   "You were journaling at the cafe. Looked so peaceful and focused. Didn't want to interrupt but wanted to say hi.",
   "Street fair last month. We both stopped at the same jewelry booth. You have great taste.",
-  "Early morning runner. We've passed each other on the same route for weeks. Wave next time?",
-  "You were reading tarot cards at the market. Got a reading from you and it was spot on. Want to know more about you.",
+  "Early morning runner on Church. We've passed each other on the same route for weeks. Wave next time?",
+  "You were reading tarot cards at Cafe Con Leche. Got a reading from you and it was spot on. Want to know more about you.",
 ];
 
 async function generatePosts() {

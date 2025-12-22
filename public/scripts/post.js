@@ -24,6 +24,7 @@ form.addEventListener("submit", async (e) => {
     const formData = {
       location: document.getElementById("location").value,
       category: document.getElementById("category").value,
+      title: document.getElementById("title").value,
       description: document.getElementById("description").value,
       expiresInDays: parseInt(document.getElementById("expiresInDays").value),
     };

@@ -43,6 +43,7 @@ function displayPost(post) {
             : ""
         }
       </div>
+      <p class="post-description">${escapeHtml(post.title)}</p>
       <p class="post-description">${escapeHtml(post.description)}</p>
       <div class="post-footer">
         <small>Posted: ${postedDate}</small>

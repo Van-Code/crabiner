@@ -7,3 +7,4 @@ coverage/
 .vscode/
 .idea/
 src/seed_posts.js
+package-lock.json

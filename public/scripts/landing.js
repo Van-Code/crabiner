@@ -31,8 +31,8 @@ async function loadRecentPosts() {
               }
             </div>
             <p class="preview-description">${escapeHtml(
-              post.description.substring(0, 150)
-            )}${post.description.length > 150 ? "..." : ""}</p>
+              post.title.substring(0, 150)
+            )}${post.title.length > 150 ? "..." : ""}</p>
             <div class="preview-footer">
               <small>${postedDate}</small>
             </div>

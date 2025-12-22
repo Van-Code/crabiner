@@ -12,6 +12,7 @@ const prevPageBtn = document.getElementById("prevPage");
 const nextPageBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 const searchQuery = document.getElementById("searchQuery");
+const filterBtn = document.getElementById("filterBtn");
 const searchBtn = document.getElementById("searchBtn");
 const clearBtn = document.getElementById("clearBtn");
 
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Enter key on location filter
   locationFilter.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
-      filterBtn.click();
+      searchBtn.click();
     }
   });
 
@@ -141,7 +142,8 @@ function createPostCard(post) {
             : ""
         }
       </div>
-      <p class="post-description">${escapeHtml(post.description)}</p>
+      
+      <p class="post-title">${escapeHtml(post.title)}</p>
       <div class="post-footer">
         <small>Posted: ${postedDate}</small>
         <small>Expires: ${expiresDate}</small>

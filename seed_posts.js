@@ -42,6 +42,58 @@ const categories = [
   "event",
   "other",
 ];
+const titles = [
+  "Blue Hair and Queer History",
+  "Wrong Stop on Purpose",
+  "Lost in the Crowd",
+  "Same Book, Same Moment",
+  "Golden Retriever Hello",
+  "Poetry Reading Laugh",
+  "Long Line Conversation",
+  "Sketchbook at the Park",
+  "Too Many Apologies",
+  "Tattoo Sleeve Barista",
+  "Yoga Class Energy",
+  "Poetry Section Recommendation",
+  "Purple Hair at Pride",
+  "Holding the Door",
+  "Accidental Unmatch",
+  "Trivia Team Magic",
+  "Window Seat Light",
+  "Flowers at the Market",
+  "Complimented My Shirt",
+  "Stayed for the Credits",
+  "Embarcadero Run",
+  "Mary Oliver Moment",
+  "Sticker Covered Laptop",
+  "Eye Contact at the Drag Show",
+  "Climbing Route Help",
+  "Library Eye Contact",
+  "Huskies in the Rain",
+  "Late Night Diner Tip",
+  "Bus Stop Bonding",
+  "Guitar in the Park",
+  "Last Vegan Ice Cream",
+  "Same Painting",
+  "DJ at the Bar",
+  "S’mores and Astrology",
+  "Vinyl Section Connection",
+  "After Your Presentation",
+  "Karaoke Perfection",
+  "Cat Cafe Cutie",
+  "Biking Side by Side",
+  "Food Truck Line Laughs",
+  "Painting at the Lookout",
+  "Tomato Garden Advice",
+  "Vintage Store Style",
+  "Open Mic Poem",
+  "Dog Park Regular",
+  "Meditation Calm",
+  "Journaling at the Cafe",
+  "Jewelry Booth Encounter",
+  "Morning Runner on Church",
+  "Tarot at Cafe Con Leche",
+];
 
 const descriptions = [
   "You were reading a book about queer history. You had short blue hair and round glasses. I was too nervous to say hello but I wish I had.",
@@ -122,6 +174,7 @@ async function generatePosts() {
       const location = locations[Math.floor(Math.random() * locations.length)];
       const category =
         categories[Math.floor(Math.random() * categories.length)];
+      const title = titles[Math.floor(Math.random() * title.length)];
       const description =
         descriptions[Math.floor(Math.random() * descriptions.length)];
 
@@ -132,6 +185,7 @@ async function generatePosts() {
       posts.push({
         location,
         category,
+        title,
         description,
         postedAt,
         expiresAt,
@@ -145,12 +199,13 @@ async function generatePosts() {
     for (const post of posts) {
       await client.query(
         `INSERT INTO posts 
-         (location, category, description, posted_at, expires_at, 
+         (location, category, title, description, posted_at, expires_at, 
           management_token_hash, session_token, is_deleted)
          VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)`,
         [
           post.location,
           post.category,
+          post.title,
           post.description,
           post.postedAt,
           post.expiresAt,

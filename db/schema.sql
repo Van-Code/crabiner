@@ -6,6 +6,7 @@ CREATE TABLE posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location VARCHAR(100) NOT NULL,
   category VARCHAR(50),
+  title VARCHAR(50) NOT NULL,
   description TEXT NOT NULL,
   posted_at TIMESTAMP DEFAULT NOW(),
   expires_at TIMESTAMP NOT NULL,

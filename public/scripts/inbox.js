@@ -42,7 +42,8 @@ function displayPostInfo(post) {
     <div class="post-card">
       <div class="post-meta">
         <span class="location">📍 ${escapeHtml(post.location)}</span>
-      </div>
+      </div>     
+      <p class="post-title">${escapeHtml(post.title)}</p>
       <p class="post-description">${escapeHtml(post.description)}</p>
       <div class="post-footer">
         <small>Expires: ${expiresDate}</small>

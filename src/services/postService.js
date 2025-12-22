@@ -4,10 +4,11 @@ import logger from "../utils/logger.js";
 import { checkContentSafety } from "./moderationService.js";
 
 export async function createPost(data) {
-  const { location, category, description, expiresInDays } = data;
+  const { location, category, title, description, expiresInDays } = data;
 
   // Check content safety BEFORE creating post
-  const safetyCheck = await checkContentSafety(description);
+  const concatText = title + " " + description;
+  const safetyCheck = await checkContentSafety(concatText);
 
   if (safetyCheck.shouldBlock) {
     throw new Error(
@@ -32,13 +33,14 @@ export async function createPost(data) {
 
   const result = await query(
     `INSERT INTO posts 
-     (location, category, description, posted_at, expires_at, 
+     (location, category, title, description, posted_at, expires_at, 
       management_token_hash, session_token)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING id, posted_at, expires_at`,
     [
       location,
       category,
+      title,
       description,
       postedAt,
       expiresAt,
@@ -81,7 +83,7 @@ export async function getPosts({
   const now = new Date();
 
   let queryText = `
-    SELECT id, location, category, description, posted_at, expires_at
+    SELECT id, location, category, title, description, posted_at, expires_at
     FROM posts
     WHERE is_deleted = FALSE 
       AND expires_at > $1
@@ -120,7 +122,7 @@ export async function getPostById(id) {
   const now = new Date();
 
   const result = await query(
-    `SELECT id, location, category, description, posted_at, expires_at
+    `SELECT id, location, category, title, description, posted_at, expires_at
      FROM posts
      WHERE id = $1 
        AND is_deleted = FALSE 
@@ -160,7 +162,7 @@ export async function deletePost(id, token) {
 
 export async function getPostBySessionToken(sessionToken) {
   const result = await query(
-    `SELECT id, location, category, description, posted_at, expires_at
+    `SELECT id, location, category, title, description, posted_at, expires_at
      FROM posts
      WHERE session_token = $1 
        AND is_deleted = FALSE 
@@ -182,7 +184,7 @@ export async function searchPosts({
   const now = new Date();
 
   let queryText = `
-    SELECT id, location, category, description, posted_at, expires_at,
+    SELECT id, location, category, title, description, posted_at, expires_at,
       ts_rank(to_tsvector('english', description || ' ' || location), 
       plainto_tsquery('english', $1)) as rank
     FROM posts
@@ -196,7 +198,8 @@ export async function searchPosts({
   // Add search condition
   if (queryString && queryString.trim()) {
     queryText += ` AND (
-      to_tsvector('english', description) @@ plainto_tsquery('english', $1)
+      to_tsvector('english', title) @@ plainto_tsquery('english', $1)
+      OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
       OR to_tsvector('english', location) @@ plainto_tsquery('english', $1)
       OR description ILIKE $${++paramCount}
       OR location ILIKE $${paramCount}

@@ -52,38 +52,5 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Load popular locations
-async function loadPopularLocations() {
-  try {
-    const response = await fetch("/api/posts/locations");
-    if (!response.ok) {
-      throw new Error("Failed to load locations");
-    }
-    const data = await response.json();
-
-    const locationsList = document.getElementById("popularLocationsList");
-
-    if (data.locations.length === 0) {
-      locationsList.innerHTML = '<p class="empty-state">No locations yet</p>';
-      return;
-    }
-
-    // Show top 10 locations as clickable tags
-    locationsList.innerHTML = data.locations
-      .slice(0, 10)
-      .map(
-        (loc) =>
-          `<button class="location-tag" onclick="window.location.href='/browse.html?location=${encodeURIComponent(loc.name)}'">
-            📍 ${escapeHtml(loc.name)} (${loc.post_count})
-          </button>`
-      )
-      .join("");
-  } catch (error) {
-    document.getElementById("popularLocationsList").innerHTML =
-      '<p class="error">Failed to load locations</p>';
-  }
-}
-
 // Load on page load
 loadRecentPosts();
-loadPopularLocations();

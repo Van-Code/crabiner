@@ -72,20 +72,27 @@
           <div id="popularSearchesList"></div>
         </div>
 
-        <!-- Popular locations -->
-        <div id="popularLocations" class="popular-locations">
-          <p><strong>Browse by location:</strong></p>
-          <div id="popularLocationsList"></div>
-        </div>
+        <div class="browse-with-sidebar">
+          <div class="browse-main">
+            <section id="posts" class="posts-grid">
+              <p class="loading">Loading posts...</p>
+            </section>
 
-        <section id="posts" class="posts-grid">
-          <p class="loading">Loading posts...</p>
-        </section>
+            <div class="pagination">
+              <button id="prevPage" disabled>← Previous</button>
+              <span id="pageInfo">Page 1</span>
+              <button id="nextPage">Next →</button>
+            </div>
+          </div>
 
-        <div class="pagination">
-          <button id="prevPage" disabled>← Previous</button>
-          <span id="pageInfo">Page 1</span>
-          <button id="nextPage">Next →</button>
+          <aside class="browse-sidebar">
+            <div class="sidebar-section">
+              <h3>Browse by location 📍</h3>
+              <div id="popularLocationsList" class="location-tags">
+                <p class="loading">Loading locations...</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </main>

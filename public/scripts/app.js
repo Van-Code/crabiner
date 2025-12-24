@@ -18,6 +18,14 @@ const clearBtn = document.getElementById("clearBtn");
 
 // Load posts on page load
 document.addEventListener("DOMContentLoaded", () => {
+  // Check for URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const locationParam = urlParams.get("location");
+  if (locationParam) {
+    locationFilter.value = locationParam;
+    currentLocation = locationParam;
+  }
+
   loadPosts();
 
   // Enter key on location filter
@@ -129,24 +137,11 @@ function displayPosts(posts) {
 
 // Create HTML for a post card
 function createPostCard(post) {
-  const postedDate = new Date(post.posted_at).toLocaleDateString();
-  const expiresDate = new Date(post.expires_at).toLocaleDateString();
-
   return `
     <div class="post-card" data-post-id="${post.id}">
-      <div class="post-meta">
+      <h3 class="post-title">${escapeHtml(post.title)}</h3>
+      <div class="post-location">
         <span class="location">📍 ${escapeHtml(post.location)}</span>
-        ${
-          post.category
-            ? `<span class="category">${escapeHtml(post.category)}</span>`
-            : ""
-        }
-      </div>
-      
-      <p class="post-title">${escapeHtml(post.title)}</p>
-      <div class="post-footer">
-        <small>Posted: ${postedDate}</small>
-        <small>Expires: ${expiresDate}</small>
       </div>
     </div>
   `;

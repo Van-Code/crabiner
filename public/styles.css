@@ -577,6 +577,34 @@ header .container {
   transform: translateX(4px);
 }
 
+/* Browse page sidebar layout */
+.browse-with-sidebar {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 968px) {
+  .browse-with-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-sidebar {
+    order: -1;
+  }
+}
+
+.browse-main {
+  min-width: 0;
+}
+
+.browse-sidebar {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
 .text-center {
   text-align: center;
   margin-top: 2rem;

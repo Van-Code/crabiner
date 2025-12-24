@@ -167,12 +167,25 @@
         <h2 class="section-title">Recent connections 💕</h2>
         <p class="section-subtitle">See who's looking for someone special...</p>
 
-        <div id="recentPostsGrid" class="preview-grid">
-          <p class="loading">Loading recent posts...</p>
-        </div>
+        <div class="posts-with-sidebar">
+          <div class="posts-main">
+            <div id="recentPostsGrid" class="preview-grid">
+              <p class="loading">Loading recent posts...</p>
+            </div>
 
-        <div class="text-center">
-          <a href="/browse.html" class="btn-primary">View All Posts →</a>
+            <div class="text-center">
+              <a href="/browse.html" class="btn-primary">View All Posts →</a>
+            </div>
+          </div>
+
+          <aside class="posts-sidebar">
+            <div class="sidebar-section">
+              <h3>Browse by location 📍</h3>
+              <div id="popularLocationsList" class="location-tags">
+                <p class="loading">Loading locations...</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>

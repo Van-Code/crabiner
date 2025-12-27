@@ -12,6 +12,7 @@ CREATE TABLE posts (
   expires_at TIMESTAMP NOT NULL,
   management_token_hash VARCHAR(255) NOT NULL,
   relay_email VARCHAR(100) UNIQUE NOT NULL,
+  contact_email_encrypted TEXT NOT NULL,
   is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );

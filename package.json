@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "env-cmd -f .env.local node src/server.js",
+    "db:seed:local": "env-cmd -f .env.local node seed_posts.js",
+
     "cleanup": "node src/services/cleanupService.js"
   },
   "dependencies": {

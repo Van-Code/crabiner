@@ -74,6 +74,8 @@ app.use(
     allowedHeaders: ["Content-Type"],
   })
 );
+// Static files first, always before rate limits and auth
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Body parsing
 app.use(express.json({ limit: "10kb" }));
@@ -83,8 +85,15 @@ app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 // See start() function below
 
 // Global rate limiting
-app.use(globalRateLimiter);
-
+// Global rate limiting only for API routes
+app.use("/api", globalRateLimiter);
+app.use("/auth", globalRateLimiter);
+app.use("/cities", globalRateLimiter);
+app.use("/inbox", globalRateLimiter);
+app.use("/landing", globalRateLimiter);
+app.use("/manage", globalRateLimiter);
+app.use("/post", globalRateLimiter);
+app.use("/view", globalRateLimiter);
 // Input sanitization
 app.use(sanitizeInputs);
 
@@ -128,7 +137,11 @@ app.get("/api/user", (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
+  if (req.path.startsWith("/api") || req.path.startsWith("/auth")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+
+  res.status(404).sendFile(path.join(__dirname, "../public/404.html"));
 });
 
 // Error handler

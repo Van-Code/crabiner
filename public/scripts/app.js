@@ -112,7 +112,174 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Display posts in grid
+// Populate city filter dropdown
+function populateCityFilter() {
+  const citiesByRegion = getCitiesByRegion();
+
+  Object.keys(citiesByRegion).forEach((region) => {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = region;
+
+    citiesByRegion[region].forEach((city) => {
+      const option = document.createElement("option");
+      option.value = city.key;
+      option.textContent = city.displayLabel;
+      if (city.key === currentCityKey) {
+        option.selected = true;
+      }
+      optgroup.appendChild(option);
+    });
+
+    cityFilter.appendChild(optgroup);
+  });
+}
+
+// Switch between list and map view
+function switchView(view) {
+  currentView = view;
+
+  if (view === "list") {
+    listViewBtn.classList.add("active");
+    mapViewBtn.classList.remove("active");
+    postsContainer.style.display = "grid";
+    paginationEl.style.display = "flex";
+    mapView.style.display = "none";
+  } else {
+    mapViewBtn.classList.add("active");
+    listViewBtn.classList.remove("active");
+    postsContainer.style.display = "none";
+    paginationEl.style.display = "none";
+    mapView.style.display = "block";
+
+    // Initialize map if not already initialized
+    if (!map) {
+      initMap();
+    }
+  }
+}
+
+// Initialize Leaflet map
+function initMap() {
+  // Default center (SF)
+  map = L.map("mapView").setView([37.7749, -122.4194], 10);
+
+  // Add OpenStreetMap tiles
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map);
+
+  // Fix map rendering issues
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 100);
+}
+
+// Load posts for map view (load all matching posts, not paginated)
+async function loadPostsForMap() {
+  try {
+    let endpoint = "/api/posts";
+    const baseParams = new URLSearchParams();
+
+    if (currentSearchQuery) {
+      endpoint = "/api/posts/search";
+      baseParams.append("q", currentSearchQuery);
+    }
+
+    if (currentCityKey) {
+      baseParams.append("cityKey", currentCityKey);
+    }
+
+    if (currentCategory) {
+      baseParams.append("category", currentCategory);
+    }
+
+    let page = 1;
+    let hasMore = true;
+    const collected = [];
+
+    while (hasMore) {
+      const params = new URLSearchParams(baseParams);
+      params.set("page", String(page));
+
+      const response = await fetch(`${endpoint}?${params}`);
+      if (!response.ok) {
+        throw new Error("Failed to load posts for map view");
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data.posts)) {
+        collected.push(...data.posts);
+      }
+
+      hasMore = Boolean(data.hasMore);
+      page++;
+    }
+
+    allPosts = collected;
+    displayPostsOnMap(allPosts);
+  } catch (error) {
+    console.error("Load posts error:", error);
+    alert("Failed to load posts for map view");
+  }
+}
+
+// Display posts as pins on map
+function displayPostsOnMap(posts) {
+  if (!map) {
+    initMap();
+  }
+
+  // Clear existing markers
+  markers.forEach((marker) => marker.remove());
+  markers = [];
+
+  if (posts.length === 0) {
+    alert("No posts found for the selected filters");
+    return;
+  }
+
+  // Add markers for each post
+  const bounds = [];
+
+  posts.forEach((post) => {
+    const coords = getPostCoordinates(post);
+    bounds.push([coords.lat, coords.lng]);
+
+    const marker = L.marker([coords.lat, coords.lng]).addTo(map);
+
+    // Create popup content
+    const popupContent = createPopupContent(post);
+    marker.bindPopup(popupContent);
+
+    markers.push(marker);
+  });
+
+  // Fit map to show all markers
+  if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [50, 50] });
+  }
+}
+
+// Create popup content for a post
+function createPopupContent(post) {
+  const description =
+    post.description.substring(0, 100) +
+    (post.description.length > 100 ? "..." : "");
+
+  return `
+    <div class="post-popup">
+      <h4>${escapeHtml(post.title)}</h4>
+      <p><strong>Category:</strong> ${escapeHtml(post.category || "Other")}</p>
+      <p>${escapeHtml(description)}</p>
+      <a href="/view.html?id=${post.id}">View full post →</a>
+    </div>
+  `;
+}
+
+// Display posts in grid (list view)
 function displayPosts(posts) {
   if (posts.length === 0) {
     postsContainer.innerHTML = `
@@ -161,8 +328,38 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Load location suggestions
-async function loadLocationSuggestions() {
+// Update URL with current filters
+function updateURL() {
+  const params = new URLSearchParams();
+
+  if (currentView !== "list") {
+    params.set("view", currentView);
+  }
+
+  if (currentCityKey) {
+    params.set("cityKey", currentCityKey);
+  }
+
+  if (currentCategory) {
+    params.set("category", currentCategory);
+  }
+
+  if (currentSearchQuery) {
+    params.set("q", currentSearchQuery);
+  }
+
+  if (currentPage > 1 && currentView === "list") {
+    params.set("page", currentPage);
+  }
+
+  const newUrl = params.toString()
+    ? `?${params.toString()}`
+    : window.location.pathname;
+  window.history.replaceState({}, "", newUrl);
+}
+
+// Load city counts for sidebar
+async function loadCityCounts() {
   try {
     const response = await fetch("/api/posts/locations");
     if (!response.ok) {
@@ -170,19 +367,31 @@ async function loadLocationSuggestions() {
     }
     const data = await response.json();
 
-    const datalist = document.getElementById("locationSuggestions");
-    datalist.innerHTML = data.locations
-      .map(
-        (loc) =>
-          `<option value="${loc.name}">${loc.name}${
-            loc.city ? `, ${loc.city}` : ""
-          } (${loc.post_count})</option>`
-      )
-      .join("");
+    // Create a map of city_key to count
+    const countsMap = {};
+    data.counts.forEach((c) => {
+      countsMap[c.city_key] = parseInt(c.count);
+    });
 
-    // Show popular locations as clickable tags
+    // Merge with city data
+    const citiesWithCounts = Object.values(CITIES).map((city) => ({
+      cityKey: city.key,
+      label: city.displayLabel,
+      count: countsMap[city.key] || 0,
+    }));
+
+    // Display in sidebar
     const popularList = document.getElementById("popularLocationsList");
-    popularList.innerHTML = data.locations
+    const nonZeroCounts = citiesWithCounts.filter((c) => c.count > 0);
+
+    if (nonZeroCounts.length === 0) {
+      popularList.innerHTML =
+        '<p style="font-size: 0.875rem; color: var(--text-light);">No posts yet</p>';
+      return;
+    }
+
+    popularList.innerHTML = nonZeroCounts
+      .sort((a, b) => b.count - a.count)
       .slice(0, 10)
       .map(
         (loc) =>

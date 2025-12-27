@@ -5,6 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Browse Posts - Crabiner</title>
     <link rel="stylesheet" href="/styles.css" />
+    <!-- Leaflet CSS for map view -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .view-toggle button {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--primary-color);
+        background: white;
+        color: var(--primary-color);
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .view-toggle button.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .view-toggle button:hover {
+        opacity: 0.8;
+      }
+
+      #mapView {
+        display: none;
+        width: 100%;
+        height: 600px;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+      }
+
+      .leaflet-popup-content {
+        margin: 0.5rem;
+      }
+
+      .post-popup {
+        max-width: 250px;
+      }
+
+      .post-popup h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+      }
+
+      .post-popup p {
+        margin: 0.25rem 0;
+        font-size: 0.875rem;
+        color: var(--text-light);
+      }
+
+      .post-popup a {
+        display: inline-block;
+        margin-top: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .post-popup a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
     <!-- Top Navigation Bar -->
@@ -35,19 +108,21 @@
           <p>Find your connection or post your own!</p>
         </div>
 
+        <!-- View Toggle -->
+        <div class="view-toggle">
+          <button id="listViewBtn" class="active">📋 List</button>
+          <button id="mapViewBtn">🗺️ Map</button>
+        </div>
+
         <section class="filters">
           <input
             type="text"
             id="searchQuery"
             placeholder="Search posts (e.g., 'coffee shop', 'dog park')..."
           />
-          <input
-            type="text"
-            id="locationFilter"
-            placeholder="Filter by location..."
-            list="locationSuggestions"
-          />
-          <datalist id="locationSuggestions"></datalist>
+          <select id="cityFilter">
+            <option value="">All cities</option>
+          </select>
           <select id="categoryFilter">
             <option value="">All categories</option>
             <option value="coffee-shop">Coffee Shop</option>
@@ -74,6 +149,10 @@
 
         <div class="browse-with-sidebar">
           <div class="browse-main">
+            <!-- Map View -->
+            <div id="mapView"></div>
+
+            <!-- List View -->
             <section id="posts" class="posts-grid">
               <p class="loading">Loading posts...</p>
             </section>
@@ -87,9 +166,9 @@
 
           <aside class="browse-sidebar">
             <div class="sidebar-section">
-              <h3>Browse by location 📍</h3>
+              <h3>Browse by city 📍</h3>
               <div id="popularLocationsList" class="location-tags">
-                <p class="loading">Loading locations...</p>
+                <p class="loading">Loading cities...</p>
               </div>
             </div>
           </aside>
@@ -142,6 +221,13 @@
       </div>
     </footer>
 
+    <!-- Leaflet JS for map view -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="/scripts/cities.js"></script>
     <script src="/scripts/auth.js"></script>
     <script src="/scripts/app.js"></script>
   </body>

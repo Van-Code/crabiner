@@ -1,3 +1,24 @@
+// Populate city selector on page load
+document.addEventListener("DOMContentLoaded", () => {
+  const citySelect = document.getElementById("cityKey");
+  const citiesByRegion = getCitiesByRegion();
+
+  // Add cities grouped by region
+  Object.keys(citiesByRegion).forEach(region => {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = region;
+
+    citiesByRegion[region].forEach(city => {
+      const option = document.createElement("option");
+      option.value = city.key;
+      option.textContent = city.displayLabel;
+      optgroup.appendChild(option);
+    });
+
+    citySelect.appendChild(optgroup);
+  });
+});
+
 // Character counter
 const description = document.getElementById("description");
 const charCount = document.getElementById("charCount");
@@ -21,8 +42,16 @@ form.addEventListener("submit", async (e) => {
   errorMessage.style.display = "none";
 
   try {
+    const cityKey = document.getElementById("cityKey").value;
+    const city = getCityByKey(cityKey);
+
+    if (!city) {
+      throw new Error("Please select a valid city");
+    }
+
     const formData = {
-      location: document.getElementById("location").value,
+      cityKey: cityKey,
+      location: city.displayLabel, // Keep location for backward compatibility
       category: document.getElementById("category").value,
       title: document.getElementById("title").value,
       description: document.getElementById("description").value,

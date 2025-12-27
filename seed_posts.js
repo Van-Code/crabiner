@@ -10,27 +10,22 @@ const client = new Client({
   connectionString: process.env.DATABASE_URL,
 });
 
-const locations = [
-  "The Castro, SF",
-  "Mission District, SF",
-  "Dolores Park, SF",
-  "Oakland Lake Merritt",
-  "Berkeley Telegraph Ave",
-  "North Beach Cafe",
-  "Hayes Valley",
-  "Haight-Ashbury",
-  "Cole Valley Coffee",
-  "Inner Sunset",
-  "Richmond District",
-  "Golden Gate Park",
-  "Bernal Heights",
-  "Noe Valley",
-  "Potrero Hill",
-  "SOMA",
-  "Financial District BART",
-  "Powell Street Station",
-  "Ferry Building",
-  "Alamo Square",
+// City keys mapping
+const cityMappings = [
+  { key: 'sf', label: 'San Francisco, CA' },
+  { key: 'oakland', label: 'Oakland, CA' },
+  { key: 'berkeley', label: 'Berkeley, CA' },
+  { key: 'sanjose', label: 'San Jose, CA' },
+  { key: 'alameda', label: 'Alameda, CA' },
+  { key: 'walnutcreek', label: 'Walnut Creek, CA' },
+  { key: 'manhattan', label: 'Manhattan, NY' },
+  { key: 'brooklyn', label: 'Brooklyn, NY' },
+  { key: 'queens', label: 'Queens, NY' },
+  { key: 'jerseycity', label: 'Jersey City, NJ' },
+  { key: 'portland', label: 'Portland, OR' },
+  { key: 'beaverton', label: 'Beaverton, OR' },
+  { key: 'gresham', label: 'Gresham, OR' },
+  { key: 'vancouverwa', label: 'Vancouver, WA' },
 ];
 
 const categories = [
@@ -42,6 +37,7 @@ const categories = [
   "event",
   "other",
 ];
+
 const titles = [
   "Blue Hair and Queer History",
   "Wrong Stop on Purpose",
@@ -76,7 +72,7 @@ const titles = [
   "Last Vegan Ice Cream",
   "Same Painting",
   "DJ at the Bar",
-  "S’mores and Astrology",
+  "S'mores and Astrology",
   "Vinyl Section Connection",
   "After Your Presentation",
   "Karaoke Perfection",
@@ -157,33 +153,31 @@ async function generatePosts() {
     const now = new Date();
 
     for (let i = 0; i < 50; i++) {
-      // Random date within last 14 days
+      // Random date within last 3 days
       const daysAgo = Math.floor(Math.random() * 3);
       const postedAt = new Date(now);
       postedAt.setDate(postedAt.getDate() - daysAgo);
       postedAt.setMinutes(0, 0, 0); // Round to hour
 
-      // Expires 7-30 days from posted date
-      const expireDays = 7 + Math.floor(Math.random() * 24);
       // Expires 7-30 days from TODAY (not from posted date)
       const expiresAt = new Date(); // Use current date
       expiresAt.setDate(
         expiresAt.getDate() + (7 + Math.floor(Math.random() * 24))
       );
 
-      const location = locations[Math.floor(Math.random() * locations.length)];
-      const category =
-        categories[Math.floor(Math.random() * categories.length)];
-      const title = titles[Math.floor(Math.random() * title.length)];
-      const description =
-        descriptions[Math.floor(Math.random() * descriptions.length)];
+      // Pick a random city
+      const cityMapping = cityMappings[Math.floor(Math.random() * cityMappings.length)];
+      const category = categories[Math.floor(Math.random() * categories.length)];
+      const title = titles[Math.floor(Math.random() * titles.length)];
+      const description = descriptions[Math.floor(Math.random() * descriptions.length)];
 
       const managementToken = nanoid(32);
       const tokenHash = await bcrypt.hash(managementToken, 10);
       const sessionToken = nanoid(32);
 
       posts.push({
-        location,
+        cityKey: cityMapping.key,
+        location: cityMapping.label,
         category,
         title,
         description,
@@ -198,10 +192,10 @@ async function generatePosts() {
 
     for (const post of posts) {
       await client.query(
-        `INSERT INTO posts 
-         (location, category, title, description, posted_at, expires_at, 
-          management_token_hash, session_token, is_deleted)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)`,
+        `INSERT INTO posts
+         (location, category, title, description, posted_at, expires_at,
+          management_token_hash, session_token, is_deleted, city_key)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)`,
         [
           post.location,
           post.category,
@@ -211,24 +205,39 @@ async function generatePosts() {
           post.expiresAt,
           post.tokenHash,
           post.sessionToken,
+          post.cityKey,
         ]
       );
     }
 
     console.log("✓ Successfully seeded 50 posts!");
 
-    // Show summary
-    const result = await client.query(`
-      SELECT category, COUNT(*) 
-      FROM posts 
+    // Show summary by category
+    const categoryResult = await client.query(`
+      SELECT category, COUNT(*)
+      FROM posts
       WHERE is_deleted = FALSE
       GROUP BY category
       ORDER BY COUNT(*) DESC
     `);
 
     console.log("\nPosts by category:");
-    result.rows.forEach((row) => {
+    categoryResult.rows.forEach((row) => {
       console.log(`  ${row.category}: ${row.count}`);
+    });
+
+    // Show summary by city
+    const cityResult = await client.query(`
+      SELECT city_key, COUNT(*)
+      FROM posts
+      WHERE is_deleted = FALSE AND city_key IS NOT NULL
+      GROUP BY city_key
+      ORDER BY COUNT(*) DESC
+    `);
+
+    console.log("\nPosts by city:");
+    cityResult.rows.forEach((row) => {
+      console.log(`  ${row.city_key}: ${row.count}`);
     });
 
     const total = await client.query(`

@@ -129,7 +129,7 @@ export async function getPostById(id) {
        AND expires_at > $2`,
     [id, now]
   );
-
+  console.log(result);
   return result.rows[0] || null;
 }
 

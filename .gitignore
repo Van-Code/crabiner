@@ -1,5 +1,6 @@
 node_modules/
 .env
+.env.local
 *.log
 .DS_Store
 dist/
@@ -8,3 +9,4 @@ coverage/
 .idea/
 src/seed_posts.js
 package-lock.json
+0.txt

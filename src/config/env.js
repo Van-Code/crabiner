@@ -32,7 +32,7 @@ if (process.env.ENCRYPTION_KEY.length < 32) {
 }
 
 export const config = {
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 5500,
   nodeEnv: process.env.NODE_ENV || "development",
   database: {
     url: process.env.DATABASE_URL,

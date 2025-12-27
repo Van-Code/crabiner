@@ -39,6 +39,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = config.port;
 
 // Security middleware
@@ -84,16 +85,9 @@ app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 // NOTE: Session and passport are initialized AFTER database connection
 // See start() function below
 
-// Global rate limiting
 // Global rate limiting only for API routes
 app.use("/api", globalRateLimiter);
 app.use("/auth", globalRateLimiter);
-app.use("/cities", globalRateLimiter);
-app.use("/inbox", globalRateLimiter);
-app.use("/landing", globalRateLimiter);
-app.use("/manage", globalRateLimiter);
-app.use("/post", globalRateLimiter);
-app.use("/view", globalRateLimiter);
 // Input sanitization
 app.use(sanitizeInputs);
 

@@ -83,7 +83,7 @@ const titles = [
   "Last Vegan Ice Cream",
   "Same Painting",
   "DJ at the Bar",
-  "S’mores and Astrology",
+  "S'mores and Astrology",
   "Vinyl Section Connection",
   "After Your Presentation",
   "Karaoke Perfection",
@@ -181,8 +181,6 @@ async function generatePosts() {
       postedAt.setDate(postedAt.getDate() - daysAgo);
       postedAt.setMinutes(0, 0, 0); // Round to hour
 
-      // Expires 7-30 days from posted date
-      const expireDays = 7 + Math.floor(Math.random() * 24);
       // Expires 7-30 days from TODAY (not from posted date)
       const expiresAt = new Date(); // Use current date
 

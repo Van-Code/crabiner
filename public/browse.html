@@ -111,19 +111,21 @@
           <p>Find your connection or post your own!</p>
         </div>
 
+        <!-- View Toggle -->
+        <div class="view-toggle">
+          <button id="listViewBtn" class="active">📋 List</button>
+          <button id="mapViewBtn">🗺️ Map</button>
+        </div>
+
         <section class="filters">
           <input
             type="text"
             id="searchQuery"
             placeholder="Search posts (e.g., 'coffee shop', 'dog park')..."
           />
-          <input
-            type="text"
-            id="locationFilter"
-            placeholder="Filter by location..."
-            list="locationSuggestions"
-          />
-          <datalist id="locationSuggestions"></datalist>
+          <select id="cityFilter">
+            <option value="">All cities</option>
+          </select>
           <select id="categoryFilter">
             <option value="">All categories</option>
             <option value="coffee-shop">Coffee Shop</option>
@@ -150,6 +152,10 @@
 
         <div class="browse-with-sidebar">
           <div class="browse-main">
+            <!-- Map View -->
+            <div id="mapView"></div>
+
+            <!-- List View -->
             <section id="posts" class="posts-grid">
               <p class="loading">Loading posts...</p>
             </section>
@@ -163,9 +169,9 @@
 
           <aside class="browse-sidebar">
             <div class="sidebar-section">
-              <h3>Browse by location 📍</h3>
+              <h3>Browse by city 📍</h3>
               <div id="popularLocationsList" class="location-tags">
-                <p class="loading">Loading locations...</p>
+                <p class="loading">Loading cities...</p>
               </div>
             </div>
           </aside>
@@ -218,9 +224,7 @@
       </div>
     </footer>
 
-    <<<<<<< HEAD =======
     <script src="/scripts/cities.js"></script>
-    >>>>>>> fe64084 (fixing merge conflicts)
     <script src="/scripts/auth.js"></script>
     <script src="/scripts/app.js"></script>
   </body>

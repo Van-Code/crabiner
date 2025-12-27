@@ -1,73 +1,77 @@
 // State
 let currentPage = 1;
 let currentLocation = "";
+let currentCityKey = "";
 let currentCategory = "";
 let currentSearchQuery = "";
+let currentView = "list"; // 'list' or 'map'
+let map = null;
+let markers = [];
+let allPosts = []; // Store posts for map view
 
 // DOM Elements
 const postsContainer = document.getElementById("posts");
-const locationFilter = document.getElementById("locationFilter");
+const cityFilter = document.getElementById("cityFilter");
 const categoryFilter = document.getElementById("categoryFilter");
 const prevPageBtn = document.getElementById("prevPage");
 const nextPageBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
 const searchQuery = document.getElementById("searchQuery");
-const filterBtn = document.getElementById("filterBtn");
 const searchBtn = document.getElementById("searchBtn");
 const clearBtn = document.getElementById("clearBtn");
+const listViewBtn = document.getElementById("listViewBtn");
+const mapViewBtn = document.getElementById("mapViewBtn");
+const mapView = document.getElementById("mapView");
+const paginationEl = document.querySelector(".pagination");
 
-// Load posts on page load
+// Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
   // Check for URL parameters
   const urlParams = new URLSearchParams(window.location.search);
-  const locationParam = urlParams.get("location");
-  if (locationParam) {
-    locationFilter.value = locationParam;
-    currentLocation = locationParam;
+  const cityParam = urlParams.get("cityKey");
+  const viewParam = urlParams.get("view");
+
+  if (cityParam) {
+    currentCityKey = cityParam;
   }
+
+  if (viewParam === "map") {
+    currentView = "map";
+    switchView("map");
+  }
+
+  // Populate city filter
+  populateCityFilter();
 
   loadPosts();
 
-  // Enter key on location filter
-  locationFilter.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      searchBtn.click();
-    }
+  // View toggle buttons
+  listViewBtn.addEventListener("click", () => {
+    switchView("list");
+    updateURL();
+    loadPosts();
+  });
+
+  mapViewBtn.addEventListener("click", () => {
+    switchView("map");
+    updateURL();
+    loadPostsForMap();
   });
 
   // Search button click
   if (searchBtn) {
     searchBtn.addEventListener("click", () => {
       currentSearchQuery = searchQuery.value.trim();
-      currentLocation = locationFilter.value.trim();
-      currentCategory = categoryFilter.value; // Get category value
+      currentCityKey = cityFilter.value;
+      currentCategory = categoryFilter.value;
       currentPage = 1;
+      updateURL();
 
-      console.log("Search clicked:", {
-        // Debug log
-        query: currentSearchQuery,
-        location: currentLocation,
-        category: currentCategory,
-      });
-
-      loadPosts();
-    });
-  }
-
-  // Filter button click (if you have a separate filter button)
-  if (filterBtn) {
-    filterBtn.addEventListener("click", () => {
-      currentLocation = locationFilter.value.trim();
-      currentCategory = categoryFilter.value; // Get category value
-      currentPage = 1;
-
-      console.log("Filter clicked:", {
-        // Debug log
-        location: currentLocation,
-        category: currentCategory,
-      });
-
-      loadPosts();
+      if (currentView === "map") {
+        loadPostsForMap();
+      } else {
+        loadPosts();
+      }
     });
   }
 
@@ -75,13 +79,19 @@ document.addEventListener("DOMContentLoaded", () => {
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
       searchQuery.value = "";
-      locationFilter.value = "";
-      categoryFilter.value = ""; // Clear category
+      cityFilter.value = "";
+      categoryFilter.value = "";
       currentSearchQuery = "";
-      currentLocation = "";
+      currentCityKey = "";
       currentCategory = "";
       currentPage = 1;
-      loadPosts();
+      updateURL();
+
+      if (currentView === "map") {
+        loadPostsForMap();
+      } else {
+        loadPosts();
+      }
     });
   }
 
@@ -99,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     prevPageBtn.addEventListener("click", () => {
       if (currentPage > 1) {
         currentPage--;
+        updateURL();
         loadPosts();
       }
     });
@@ -107,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (nextPageBtn) {
     nextPageBtn.addEventListener("click", () => {
       currentPage++;
+      updateURL();
       loadPosts();
     });
   }
@@ -361,10 +373,8 @@ function updateURL() {
 // Load city counts for sidebar
 async function loadCityCounts() {
   try {
-    const response = await fetch("/api/posts/locations");
-    if (!response.ok) {
-      throw new Error("Failed to load locations");
-    }
+    // Fetch counts from API
+    const response = await fetch("/api/posts/city-counts");
     const data = await response.json();
 
     // Create a map of city_key to count
@@ -394,9 +404,9 @@ async function loadCityCounts() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
       .map(
-        (loc) =>
-          `<button class="location-tag" data-location="${loc.name}">
-        📍 ${loc.name} (${loc.post_count})
+        (c) =>
+          `<button class="location-tag" data-city-key="${c.cityKey}">
+        📍 ${c.label} (${c.count})
       </button>`
       )
       .join("");
@@ -404,14 +414,25 @@ async function loadCityCounts() {
     // Click handler
     document.querySelectorAll(".location-tag").forEach((btn) => {
       btn.addEventListener("click", () => {
-        locationFilter.value = btn.dataset.location;
-        searchBtn.click();
+        cityFilter.value = btn.dataset.cityKey;
+        currentCityKey = btn.dataset.cityKey;
+        currentPage = 1;
+        updateURL();
+
+        if (currentView === "map") {
+          loadPostsForMap();
+        } else {
+          loadPosts();
+        }
       });
     });
   } catch (error) {
-    console.error("Failed to load locations:", error);
+    console.error("Failed to load city counts:", error);
+    document.getElementById("popularLocationsList").innerHTML =
+      '<p style="font-size: 0.875rem; color: var(--text-light);">Error loading cities</p>';
   }
 }
+
 async function loadPopularSearches() {
   try {
     const response = await fetch("/api/posts/popular-searches");
@@ -460,17 +481,15 @@ async function loadPosts() {
       params.append("q", currentSearchQuery);
     }
 
-    if (currentLocation) {
-      params.append("location", currentLocation);
+    if (currentCityKey) {
+      params.append("cityKey", currentCityKey);
     }
 
     if (currentCategory) {
       params.append("category", currentCategory);
-      console.log("Adding category param:", currentCategory); // Debug log
     }
 
     const finalUrl = `${endpoint}?${params}`;
-    console.log("Fetching:", finalUrl); // Debug log
 
     const response = await fetch(finalUrl);
 
@@ -479,16 +498,18 @@ async function loadPosts() {
     }
 
     const data = await response.json();
-    console.log("Received posts:", data.posts.length); // Debug log
 
     displayPosts(data.posts);
     updatePagination(data.hasMore);
 
-    /// Show search results count
-    if (currentSearchQuery || currentLocation || currentCategory) {
+    // Show search results count
+    if (currentSearchQuery || currentCityKey || currentCategory) {
       const filters = [];
       if (currentSearchQuery) filters.push(`"${currentSearchQuery}"`);
-      if (currentLocation) filters.push(`location: ${currentLocation}`);
+      if (currentCityKey) {
+        const city = getCityByKey(currentCityKey);
+        filters.push(`city: ${city ? city.label : currentCityKey}`);
+      }
       if (currentCategory) filters.push(`category: ${currentCategory}`);
 
       const resultsText =
@@ -513,5 +534,6 @@ async function loadPosts() {
     `;
   }
 }
-loadLocationSuggestions();
+
+loadCityCounts();
 loadPopularSearches();

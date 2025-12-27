@@ -22,16 +22,18 @@ router.get(
   query("page").optional().isInt({ min: 1 }),
   query("location").optional().trim().isLength({ max: 100 }),
   query("category").optional(),
+  query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const { q, page = 1, location, category } = req.query;
+      const { q, page = 1, location, category, cityKey } = req.query;
 
       const results = await searchPosts({
         queryString: q,
         page: parseInt(page),
         location,
         category,
+        cityKey,
       });
 
       res.json(results);
@@ -40,7 +42,26 @@ router.get(
     }
   }
 );
-// Get location suggestions
+// Get city counts
+router.get("/city-counts", async (req, res, next) => {
+  try {
+    const result = await dbQuery(
+      `SELECT city_key, COUNT(*) as count
+       FROM posts
+       WHERE is_deleted = FALSE
+         AND expires_at > NOW()
+         AND city_key IS NOT NULL
+       GROUP BY city_key
+       ORDER BY count DESC`
+    );
+
+    res.json({ counts: result.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get location suggestions (legacy, kept for compatibility)
 router.get("/locations", async (req, res, next) => {
   try {
     const result = await dbQuery(
@@ -71,15 +92,17 @@ router.get(
   "/",
   query("page").optional().isInt({ min: 1 }),
   query("location").optional().trim().isLength({ max: 100 }),
-  query("category").optional().trim(), // Add this
+  query("category").optional().trim(),
+  query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const { page = 1, location, category } = req.query;
+      const { page = 1, location, category, cityKey } = req.query;
       const posts = await getPosts({
         page: parseInt(page),
         location,
-        category, // Add this
+        category,
+        cityKey,
       });
       res.json(posts);
     } catch (error) {
@@ -106,6 +129,7 @@ router.post(
   "/",
   postRateLimiter,
   body("location").trim().isLength({ min: 2, max: 100 }),
+  body("cityKey").optional().trim().isLength({ max: 50 }),
   body("category")
     .optional()
     .trim()
@@ -118,6 +142,7 @@ router.post(
       "event",
       "other",
     ]),
+  body("title").trim().isLength({ min: 1, max: 100 }),
   body("description").trim().isLength({ min: 10, max: 2000 }),
   body("expiresInDays").isInt({ min: 7, max: 30 }),
   validateRequest,

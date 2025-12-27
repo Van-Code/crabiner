@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 import { checkContentSafety } from "./moderationService.js";
 
 export async function createPost(data) {
-  const { location, category, title, description, expiresInDays } = data;
+  const { location, category, title, description, expiresInDays, cityKey } = data;
 
   // Check content safety BEFORE creating post
   const concatText = title + " " + description;
@@ -32,10 +32,10 @@ export async function createPost(data) {
   const sessionToken = generateToken();
 
   const result = await query(
-    `INSERT INTO posts 
-     (location, category, title, description, posted_at, expires_at, 
-      management_token_hash, session_token)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO posts
+     (location, category, title, description, posted_at, expires_at,
+      management_token_hash, session_token, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING id, posted_at, expires_at`,
     [
       location,
@@ -46,6 +46,7 @@ export async function createPost(data) {
       expiresAt,
       tokenHash,
       sessionToken,
+      cityKey,
     ]
   );
 
@@ -77,25 +78,31 @@ export async function getPosts({
   page = 1,
   location = null,
   category = null,
+  cityKey = null,
   limit = 20,
 }) {
   const offset = (page - 1) * limit;
   const now = new Date();
 
   let queryText = `
-    SELECT id, location, category, title, description, posted_at, expires_at
+    SELECT id, location, category, title, description, posted_at, expires_at, city_key
     FROM posts
-    WHERE is_deleted = FALSE 
+    WHERE is_deleted = FALSE
       AND expires_at > $1
   `;
 
   const params = [now];
   let paramCount = 1;
 
-  if (location) {
+  // Prefer city_key filter over location text filter
+  if (cityKey) {
+    queryText += ` AND city_key = $${++paramCount}`;
+    params.push(cityKey);
+  } else if (location) {
     queryText += ` AND location ILIKE $${++paramCount}`;
     params.push(`%${location}%`);
   }
+
   // Add category filter
   if (category) {
     queryText += ` AND category = $${++paramCount}`;
@@ -122,10 +129,10 @@ export async function getPostById(id) {
   const now = new Date();
 
   const result = await query(
-    `SELECT id, location, category, title, description, posted_at, expires_at
+    `SELECT id, location, category, title, description, posted_at, expires_at, city_key
      FROM posts
-     WHERE id = $1 
-       AND is_deleted = FALSE 
+     WHERE id = $1
+       AND is_deleted = FALSE
        AND expires_at > $2`,
     [id, now]
   );
@@ -178,17 +185,18 @@ export async function searchPosts({
   page = 1,
   location = null,
   category = null,
+  cityKey = null,
   limit = 20,
 }) {
   const offset = (page - 1) * limit;
   const now = new Date();
 
   let queryText = `
-    SELECT id, location, category, title, description, posted_at, expires_at,
-      ts_rank(to_tsvector('english', description || ' ' || location), 
+    SELECT id, location, category, title, description, posted_at, expires_at, city_key,
+      ts_rank(to_tsvector('english', description || ' ' || location),
       plainto_tsquery('english', $1)) as rank
     FROM posts
-    WHERE is_deleted = FALSE 
+    WHERE is_deleted = FALSE
       AND expires_at > $2
   `;
 
@@ -207,8 +215,11 @@ export async function searchPosts({
     params.push(`%${queryString}%`);
   }
 
-  // Add location filter
-  if (location) {
+  // Add city_key filter (preferred over location filter)
+  if (cityKey) {
+    queryText += ` AND city_key = $${++paramCount}`;
+    params.push(cityKey);
+  } else if (location) {
     queryText += ` AND location ILIKE $${++paramCount}`;
     params.push(`%${location}%`);
   }

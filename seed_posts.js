@@ -21,20 +21,22 @@ const TEST_USERS = [
 const RELAY_EMAIL_DOMAIN =
   process.env.RELAY_EMAIL_DOMAIN || "relay.crabiner.test";
 
-const locations = [
-  "The Castro, SF",
-  "Mission District, SF",
-  "Dolores Park, SF",
-  "Oakland Lake Merritt",
-  "Berkeley Telegraph Ave",
-  "Hayes Valley",
-  "Golden Gate Park",
-  "Bernal Heights",
-  "Noe Valley",
-  "Financial District BART",
-  "Powell Street Station",
-  "Ferry Building",
-  "Alamo Square",
+// City keys mapping
+const cityMappings = [
+  { key: "sf", label: "San Francisco, CA" },
+  { key: "oakland", label: "Oakland, CA" },
+  { key: "berkeley", label: "Berkeley, CA" },
+  { key: "sanjose", label: "San Jose, CA" },
+  { key: "alameda", label: "Alameda, CA" },
+  { key: "walnutcreek", label: "Walnut Creek, CA" },
+  { key: "manhattan", label: "Manhattan, NY" },
+  { key: "brooklyn", label: "Brooklyn, NY" },
+  { key: "queens", label: "Queens, NY" },
+  { key: "jerseycity", label: "Jersey City, NJ" },
+  { key: "portland", label: "Portland, OR" },
+  { key: "beaverton", label: "Beaverton, OR" },
+  { key: "gresham", label: "Gresham, OR" },
+  { key: "vancouverwa", label: "Vancouver, WA" },
 ];
 
 const categories = [
@@ -190,9 +192,13 @@ async function generatePosts() {
       // Must be UNIQUE
       const relayEmail = `post_${nanoid(12)}@${RELAY_EMAIL_DOMAIN}`;
 
+      // Pick a random city
+      const cityMapping = randomFrom(cityMappings);
+
       posts.push({
         ownerEmail,
-        location: randomFrom(locations),
+        cityKey: cityMapping.key,
+        location: cityMapping.label,
         category: randomFrom(categories),
         title: randomFrom(titles),
         description: randomFrom(descriptions),
@@ -211,9 +217,9 @@ async function generatePosts() {
         `
         INSERT INTO posts
           (location, category, title, description, posted_at, expires_at,
-           management_token_hash, relay_email, contact_email_encrypted, is_deleted)
+           management_token_hash, relay_email, contact_email_encrypted, is_deleted, city_key)
         VALUES
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         `,
         [
           post.location,
@@ -226,6 +232,7 @@ async function generatePosts() {
           post.relayEmail,
           post.contactEmailEncrypted,
           false,
+          post.cityKey,
         ]
       );
     }
@@ -234,6 +241,18 @@ async function generatePosts() {
 
     const byEmail = await client.query(`
       SELECT contact_email_encrypted AS owner, COUNT(*) AS count
+      FROM posts
+      WHERE is_deleted = FALSE
+      GROUP BY contact_email_encrypted
+      ORDER BY count DESC
+    `);
+
+    console.log("\nPosts by (encrypted) owner:");
+    byEmail.rows.forEach((r) => console.log(`  ${r.owner}: ${r.count}`));
+
+    // Show summary by category
+    const categoryResult = await client.query(`
+      SELECT category, COUNT(*)
       FROM posts
       WHERE is_deleted = FALSE
       GROUP BY contact_email_encrypted

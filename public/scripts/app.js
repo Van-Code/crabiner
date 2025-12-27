@@ -128,11 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function populateCityFilter() {
   const citiesByRegion = getCitiesByRegion();
 
-  Object.keys(citiesByRegion).forEach(region => {
+  Object.keys(citiesByRegion).forEach((region) => {
     const optgroup = document.createElement("optgroup");
     optgroup.label = region;
 
-    citiesByRegion[region].forEach(city => {
+    citiesByRegion[region].forEach((city) => {
       const option = document.createElement("option");
       option.value = city.key;
       option.textContent = city.displayLabel;
@@ -173,12 +173,13 @@ function switchView(view) {
 // Initialize Leaflet map
 function initMap() {
   // Default center (SF)
-  map = L.map('mapView').setView([37.7749, -122.4194], 10);
+  map = L.map("mapView").setView([37.7749, -122.4194], 10);
 
   // Add OpenStreetMap tiles
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
   // Fix map rendering issues
@@ -191,33 +192,45 @@ function initMap() {
 async function loadPostsForMap() {
   try {
     let endpoint = "/api/posts";
-    const params = new URLSearchParams({ page: 1 });
+    const baseParams = new URLSearchParams();
 
     if (currentSearchQuery) {
       endpoint = "/api/posts/search";
-      params.append("q", currentSearchQuery);
+      baseParams.append("q", currentSearchQuery);
     }
 
     if (currentCityKey) {
-      params.append("cityKey", currentCityKey);
+      baseParams.append("cityKey", currentCityKey);
     }
 
     if (currentCategory) {
-      params.append("category", currentCategory);
+      baseParams.append("category", currentCategory);
     }
 
-    // For map, we want to load more posts to show
-    params.set("page", "1");
+    let page = 1;
+    let hasMore = true;
+    const collected = [];
 
-    const response = await fetch(`${endpoint}?${params}`);
+    while (hasMore) {
+      const params = new URLSearchParams(baseParams);
+      params.set("page", String(page));
 
-    if (!response.ok) {
-      throw new Error("Failed to load posts");
+      const response = await fetch(`${endpoint}?${params}`);
+      if (!response.ok) {
+        throw new Error("Failed to load posts for map view");
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data.posts)) {
+        collected.push(...data.posts);
+      }
+
+      hasMore = Boolean(data.hasMore);
+      page++;
     }
 
-    const data = await response.json();
-    allPosts = data.posts;
-
+    allPosts = collected;
     displayPostsOnMap(allPosts);
   } catch (error) {
     console.error("Load posts error:", error);
@@ -232,7 +245,7 @@ function displayPostsOnMap(posts) {
   }
 
   // Clear existing markers
-  markers.forEach(marker => marker.remove());
+  markers.forEach((marker) => marker.remove());
   markers = [];
 
   if (posts.length === 0) {
@@ -243,7 +256,7 @@ function displayPostsOnMap(posts) {
   // Add markers for each post
   const bounds = [];
 
-  posts.forEach(post => {
+  posts.forEach((post) => {
     const coords = getPostCoordinates(post);
     bounds.push([coords.lat, coords.lng]);
 
@@ -264,7 +277,9 @@ function displayPostsOnMap(posts) {
 
 // Create popup content for a post
 function createPopupContent(post) {
-  const description = post.description.substring(0, 100) + (post.description.length > 100 ? "..." : "");
+  const description =
+    post.description.substring(0, 100) +
+    (post.description.length > 100 ? "..." : "");
 
   return `
     <div class="post-popup">
@@ -349,8 +364,10 @@ function updateURL() {
     params.set("page", currentPage);
   }
 
-  const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
-  window.history.replaceState({}, '', newUrl);
+  const newUrl = params.toString()
+    ? `?${params.toString()}`
+    : window.location.pathname;
+  window.history.replaceState({}, "", newUrl);
 }
 
 // Load city counts for sidebar
@@ -362,23 +379,24 @@ async function loadCityCounts() {
 
     // Create a map of city_key to count
     const countsMap = {};
-    data.counts.forEach(c => {
+    data.counts.forEach((c) => {
       countsMap[c.city_key] = parseInt(c.count);
     });
 
     // Merge with city data
-    const citiesWithCounts = Object.values(CITIES).map(city => ({
+    const citiesWithCounts = Object.values(CITIES).map((city) => ({
       cityKey: city.key,
       label: city.displayLabel,
-      count: countsMap[city.key] || 0
+      count: countsMap[city.key] || 0,
     }));
 
     // Display in sidebar
     const popularList = document.getElementById("popularLocationsList");
-    const nonZeroCounts = citiesWithCounts.filter(c => c.count > 0);
+    const nonZeroCounts = citiesWithCounts.filter((c) => c.count > 0);
 
     if (nonZeroCounts.length === 0) {
-      popularList.innerHTML = '<p style="font-size: 0.875rem; color: var(--text-light);">No posts yet</p>';
+      popularList.innerHTML =
+        '<p style="font-size: 0.875rem; color: var(--text-light);">No posts yet</p>';
       return;
     }
 

@@ -23,20 +23,20 @@ const RELAY_EMAIL_DOMAIN =
 
 // City keys mapping
 const cityMappings = [
-  { key: 'sf', label: 'San Francisco, CA' },
-  { key: 'oakland', label: 'Oakland, CA' },
-  { key: 'berkeley', label: 'Berkeley, CA' },
-  { key: 'sanjose', label: 'San Jose, CA' },
-  { key: 'alameda', label: 'Alameda, CA' },
-  { key: 'walnutcreek', label: 'Walnut Creek, CA' },
-  { key: 'manhattan', label: 'Manhattan, NY' },
-  { key: 'brooklyn', label: 'Brooklyn, NY' },
-  { key: 'queens', label: 'Queens, NY' },
-  { key: 'jerseycity', label: 'Jersey City, NJ' },
-  { key: 'portland', label: 'Portland, OR' },
-  { key: 'beaverton', label: 'Beaverton, OR' },
-  { key: 'gresham', label: 'Gresham, OR' },
-  { key: 'vancouverwa', label: 'Vancouver, WA' },
+  { key: "sf", label: "San Francisco, CA" },
+  { key: "oakland", label: "Oakland, CA" },
+  { key: "berkeley", label: "Berkeley, CA" },
+  { key: "sanjose", label: "San Jose, CA" },
+  { key: "alameda", label: "Alameda, CA" },
+  { key: "walnutcreek", label: "Walnut Creek, CA" },
+  { key: "manhattan", label: "Manhattan, NY" },
+  { key: "brooklyn", label: "Brooklyn, NY" },
+  { key: "queens", label: "Queens, NY" },
+  { key: "jerseycity", label: "Jersey City, NJ" },
+  { key: "portland", label: "Portland, OR" },
+  { key: "beaverton", label: "Beaverton, OR" },
+  { key: "gresham", label: "Gresham, OR" },
+  { key: "vancouverwa", label: "Vancouver, WA" },
 ];
 
 const categories = [
@@ -179,18 +179,19 @@ async function generatePosts() {
       const daysAgo = Math.floor(Math.random() * 3);
       const postedAt = new Date(now);
       postedAt.setDate(postedAt.getDate() - daysAgo);
-      postedAt.setMinutes(0, 0, 0);
+      postedAt.setMinutes(0, 0, 0); // Round to hour
 
-      const expiresAt = new Date(now);
-      expiresAt.setDate(
-        expiresAt.getDate() + (7 + Math.floor(Math.random() * 24))
-      );
+      // Expires 7-30 days from posted date
+      const expireDays = 7 + Math.floor(Math.random() * 24);
+      // Expires 7-30 days from TODAY (not from posted date)
+      const expiresAt = new Date(); // Use current date
 
       const managementToken = nanoid(32);
       const tokenHash = await bcrypt.hash(managementToken, 10);
 
       // Must be UNIQUE
       const relayEmail = `post_${nanoid(12)}@${RELAY_EMAIL_DOMAIN}`;
+      const sessionToken = nanoid(32);
 
       // Pick a random city
       const cityMapping = randomFrom(cityMappings);
@@ -205,6 +206,7 @@ async function generatePosts() {
         postedAt,
         expiresAt,
         tokenHash,
+        sessionToken,
         relayEmail,
         contactEmailEncrypted: encryptEmailForDev(ownerEmail),
       });
@@ -217,7 +219,7 @@ async function generatePosts() {
         `
         INSERT INTO posts
           (location, category, title, description, posted_at, expires_at,
-           management_token_hash, relay_email, contact_email_encrypted, is_deleted, city_key)
+           management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted)
         VALUES
           ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         `,
@@ -229,10 +231,10 @@ async function generatePosts() {
           post.postedAt,
           post.expiresAt,
           post.tokenHash,
+          post.sessionToken,
           post.relayEmail,
           post.contactEmailEncrypted,
           false,
-          post.cityKey,
         ]
       );
     }

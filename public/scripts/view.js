@@ -23,7 +23,7 @@ async function loadPost() {
     document.getElementById("postDetail").innerHTML = `
      <div class="error-message">
        <p>${error.message}</p>
-       <a href="/" class="btn-secondary">Return to all posts</a>
+       <a href="/browse.html" class="btn-secondary">Return to all posts</a>
      </div>
    `;
   }

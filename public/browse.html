@@ -4,14 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Browse Posts - Crabiner</title>
-    <link rel="stylesheet" href="/styles.css" />
-    <!-- Leaflet CSS for map view -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
+    <link rel="stylesheet" href="/styles/styles.css" />
+    <!-- Leaflet JS for map view -->
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+    <script src="/vendor/leaflet/leaflet.js"></script>
     <style>
       .view-toggle {
         display: flex;
@@ -76,6 +72,13 @@
 
       .post-popup a:hover {
         text-decoration: underline;
+      }
+      #mapView {
+        height: 70vh;
+        min-height: 420px;
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
       }
     </style>
   </head>
@@ -214,19 +217,13 @@
 
         <div class="footer-bottom">
           <p>
-            &copy; 2025 Crabiner. Built with care for queer women &
-            nonbinary folks. 🏳️‍🌈
+            &copy; 2025 Crabiner. Built with care for queer women & nonbinary
+            folks. 🏳️‍🌈
           </p>
         </div>
       </div>
     </footer>
 
-    <!-- Leaflet JS for map view -->
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
-    ></script>
     <script src="/scripts/cities.js"></script>
     <script src="/scripts/auth.js"></script>
     <script src="/scripts/app.js"></script>

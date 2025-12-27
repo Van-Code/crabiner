@@ -1,3 +1,7 @@
+-- Drop email-related columns from posts table
+ALTER TABLE posts DROP COLUMN IF EXISTS relay_email;
+ALTER TABLE posts DROP COLUMN IF EXISTS contact_email_encrypted;
+
 -- Add session token for poster to check their inbox
 ALTER TABLE posts ADD COLUMN session_token VARCHAR(255) UNIQUE;
 

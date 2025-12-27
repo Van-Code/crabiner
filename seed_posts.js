@@ -1,7 +1,5 @@
 // seed_posts.js
 // Run with: node seed_posts.js
-// Required env: DATABASE_URL
-// Optional env: RELAY_EMAIL_DOMAIN (default: "relay.crabiner.test")
 
 import pkg from "pg";
 const { Client } = pkg;
@@ -12,25 +10,23 @@ const client = new Client({
   connectionString: process.env.DATABASE_URL,
 });
 
-const TEST_USERS = [
-  "thiswell@gmail.com",
-  "van.acxiom@gmail.com",
-  "wolfandreedconsulting@gmail.com",
-];
-
-const RELAY_EMAIL_DOMAIN =
-  process.env.RELAY_EMAIL_DOMAIN || "relay.crabiner.test";
-
 const locations = [
   "The Castro, SF",
   "Mission District, SF",
   "Dolores Park, SF",
   "Oakland Lake Merritt",
   "Berkeley Telegraph Ave",
+  "North Beach Cafe",
   "Hayes Valley",
+  "Haight-Ashbury",
+  "Cole Valley Coffee",
+  "Inner Sunset",
+  "Richmond District",
   "Golden Gate Park",
   "Bernal Heights",
   "Noe Valley",
+  "Potrero Hill",
+  "SOMA",
   "Financial District BART",
   "Powell Street Station",
   "Ferry Building",
@@ -46,7 +42,6 @@ const categories = [
   "event",
   "other",
 ];
-
 const titles = [
   "Blue Hair and Queer History",
   "Wrong Stop on Purpose",
@@ -153,54 +148,49 @@ const descriptions = [
   "You were reading tarot cards at Cafe Con Leche. Got a reading from you and it was spot on. Want to know more about you.",
 ];
 
-// Replace this with your real encryption if needed
-function encryptEmailForDev(email) {
-  // For dev seeding only. If your app decrypts, this must match its encryption scheme.
-  return email;
-}
-
-function randomFrom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 async function generatePosts() {
   try {
     await client.connect();
     console.log("Connected to database");
 
-    const now = new Date();
     const posts = [];
+    const now = new Date();
 
     for (let i = 0; i < 50; i++) {
-      const ownerEmail = TEST_USERS[i % TEST_USERS.length];
-
+      // Random date within last 14 days
       const daysAgo = Math.floor(Math.random() * 3);
       const postedAt = new Date(now);
       postedAt.setDate(postedAt.getDate() - daysAgo);
-      postedAt.setMinutes(0, 0, 0);
+      postedAt.setMinutes(0, 0, 0); // Round to hour
 
-      const expiresAt = new Date(now);
+      // Expires 7-30 days from posted date
+      const expireDays = 7 + Math.floor(Math.random() * 24);
+      // Expires 7-30 days from TODAY (not from posted date)
+      const expiresAt = new Date(); // Use current date
       expiresAt.setDate(
         expiresAt.getDate() + (7 + Math.floor(Math.random() * 24))
       );
 
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      const category =
+        categories[Math.floor(Math.random() * categories.length)];
+      const title = titles[Math.floor(Math.random() * title.length)];
+      const description =
+        descriptions[Math.floor(Math.random() * descriptions.length)];
+
       const managementToken = nanoid(32);
       const tokenHash = await bcrypt.hash(managementToken, 10);
-
-      // Must be UNIQUE
-      const relayEmail = `post_${nanoid(12)}@${RELAY_EMAIL_DOMAIN}`;
+      const sessionToken = nanoid(32);
 
       posts.push({
-        ownerEmail,
-        location: randomFrom(locations),
-        category: randomFrom(categories),
-        title: randomFrom(titles),
-        description: randomFrom(descriptions),
+        location,
+        category,
+        title,
+        description,
         postedAt,
         expiresAt,
         tokenHash,
-        relayEmail,
-        contactEmailEncrypted: encryptEmailForDev(ownerEmail),
+        sessionToken,
       });
     }
 
@@ -208,13 +198,10 @@ async function generatePosts() {
 
     for (const post of posts) {
       await client.query(
-        `
-        INSERT INTO posts
-          (location, category, title, description, posted_at, expires_at,
-           management_token_hash, relay_email, contact_email_encrypted, is_deleted)
-        VALUES
-          ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        `,
+        `INSERT INTO posts 
+         (location, category, title, description, posted_at, expires_at, 
+          management_token_hash, session_token, is_deleted)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)`,
         [
           post.location,
           post.category,
@@ -223,25 +210,31 @@ async function generatePosts() {
           post.postedAt,
           post.expiresAt,
           post.tokenHash,
-          post.relayEmail,
-          post.contactEmailEncrypted,
-          false,
+          post.sessionToken,
         ]
       );
     }
 
     console.log("✓ Successfully seeded 50 posts!");
 
-    const byEmail = await client.query(`
-      SELECT contact_email_encrypted AS owner, COUNT(*) AS count
-      FROM posts
+    // Show summary
+    const result = await client.query(`
+      SELECT category, COUNT(*) 
+      FROM posts 
       WHERE is_deleted = FALSE
-      GROUP BY contact_email_encrypted
-      ORDER BY count DESC
+      GROUP BY category
+      ORDER BY COUNT(*) DESC
     `);
 
-    console.log("\nPosts by (encrypted) owner:");
-    byEmail.rows.forEach((r) => console.log(`  ${r.owner}: ${r.count}`));
+    console.log("\nPosts by category:");
+    result.rows.forEach((row) => {
+      console.log(`  ${row.category}: ${row.count}`);
+    });
+
+    const total = await client.query(`
+      SELECT COUNT(*) FROM posts WHERE is_deleted = FALSE
+    `);
+    console.log(`\nTotal active posts: ${total.rows[0].count}`);
 
     await client.end();
     console.log("\n✓ Done!");

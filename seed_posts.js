@@ -197,7 +197,6 @@ async function generatePosts() {
       const cityMapping = randomFrom(cityMappings);
 
       posts.push({
-        ownerEmail,
         cityKey: cityMapping.key,
         location: cityMapping.label,
         category: randomFrom(categories),

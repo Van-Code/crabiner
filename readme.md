@@ -154,7 +154,7 @@ NODE_ENV=production
 PORT=3000
 
 # Database
-DATABASE_URL=postgresql://mc_app:your_password@localhost:5432/missed_connections
+DATABASE_URL=postgresql://db_user:your_password@localhost:5432/db_name
 
 # Email (AWS SES example)
 SMTP_HOST=email-smtp.us-east-1.amazonaws.com
@@ -166,7 +166,7 @@ RELAY_DOMAIN=shyporcupine.com
 
 # Security (generate random 32+ character string)
 ENCRYPTION_KEY=your_32_byte_encryption_key_here_change_this
-ALLOWED_ORIGINS=https://shyporcupine.com,http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:3000,crabiner.vercel.app
 
 # Rate Limiting
 MAX_POSTS_PER_DAY=5

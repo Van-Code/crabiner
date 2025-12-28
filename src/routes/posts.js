@@ -20,7 +20,6 @@ router.get(
   "/search",
   query("q").optional().trim().isLength({ max: 200 }),
   query("page").optional().isInt({ min: 1 }),
-  query("location").optional().trim().isLength({ max: 100 }),
   query("category").optional(),
   query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,
@@ -61,22 +60,6 @@ router.get("/city-counts", async (req, res, next) => {
   }
 });
 
-// Get location suggestions (legacy, kept for compatibility)
-router.get("/locations", async (req, res, next) => {
-  try {
-    const result = await dbQuery(
-      `SELECT name, city, state, post_count
-         FROM common_locations
-         ORDER BY post_count DESC, name ASC
-         LIMIT 20`
-    );
-
-    res.json({ locations: result.rows });
-  } catch (error) {
-    next(error);
-  }
-});
-
 // Get popular searches
 router.get("/popular-searches", async (req, res, next) => {
   try {
@@ -91,7 +74,6 @@ router.get("/popular-searches", async (req, res, next) => {
 router.get(
   "/",
   query("page").optional().isInt({ min: 1 }),
-  query("location").optional().trim().isLength({ max: 100 }),
   query("category").optional().trim(),
   query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,

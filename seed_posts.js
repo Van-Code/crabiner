@@ -183,6 +183,9 @@ async function generatePosts() {
 
       // Expires 7-30 days from TODAY (not from posted date)
       const expiresAt = new Date(); // Use current date
+      expiresAt.setDate(
+        expiresAt.getDate() + (7 + Math.floor(Math.random() * 24))
+      );
 
       const managementToken = nanoid(32);
       const tokenHash = await bcrypt.hash(managementToken, 10);
@@ -248,15 +251,6 @@ async function generatePosts() {
 
     console.log("\nPosts by (encrypted) owner:");
     byEmail.rows.forEach((r) => console.log(`  ${r.owner}: ${r.count}`));
-
-    // Show summary by category
-    const categoryResult = await client.query(`
-      SELECT category, COUNT(*)
-      FROM posts
-      WHERE is_deleted = FALSE
-      GROUP BY contact_email_encrypted
-      ORDER BY count DESC
-    `);
 
     console.log("\nPosts by (encrypted) owner:");
     byEmail.rows.forEach((r) => console.log(`  ${r.owner}: ${r.count}`));

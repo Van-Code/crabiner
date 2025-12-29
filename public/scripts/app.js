@@ -8,6 +8,19 @@ let map = null;
 let markers = [];
 let allPosts = []; // Store posts for map view
 
+// Global function for mobile city filter
+window.handleCityFilterChange = function(cityKey) {
+  currentCityKey = cityKey;
+  currentPage = 1;
+  updateURL();
+
+  if (currentView === "map") {
+    loadPostsForMap();
+  } else {
+    loadPosts();
+  }
+};
+
 // DOM Elements
 const postsContainer = document.getElementById("posts");
 const cityFilter = document.getElementById("cityFilter");
@@ -412,6 +425,11 @@ async function loadCityCounts() {
         }
       });
     });
+
+    // Also populate mobile city list if function exists
+    if (typeof window.populateMobileCityList === 'function') {
+      window.populateMobileCityList(citiesWithCounts);
+    }
   } catch (error) {
     console.error("Failed to load city counts:", error);
     document.getElementById("popularLocationsList").innerHTML =

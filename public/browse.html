@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Browse Posts - Crabiner</title>
     <link rel="stylesheet" href="/styles/styles.css" />
+    <link rel="stylesheet" href="/styles/browse.css" />
     <!-- Leaflet JS for map view -->
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <script src="/vendor/leaflet/leaflet.js"></script>
@@ -93,7 +94,13 @@
           </a>
         </div>
 
-        <div class="nav-links">
+        <button class="hamburger-menu" id="hamburgerBtn" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
           <a href="/browse.html" class="nav-link active">Browse</a>
           <a href="/guidelines.html" class="nav-link">Guidelines</a>
 
@@ -103,6 +110,7 @@
         </div>
       </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <main class="browse-page">
       <div class="container">
@@ -117,7 +125,12 @@
           <button id="mapViewBtn">🗺️ Map</button>
         </div>
 
-        <section class="filters">
+        <button class="mobile-filter-toggle" id="filterToggle">
+          <span>Filters</span>
+          <span class="toggle-icon">▼</span>
+        </button>
+
+        <section class="filters" id="filtersSection">
           <select id="cityFilter">
             <option value="">All cities</option>
           </select>
@@ -165,6 +178,19 @@
       </div>
     </main>
 
+    <!-- Mobile sticky footer with browse by city -->
+    <div class="mobile-sticky-footer" id="mobileFooter">
+      <button class="footer-toggle" id="footerToggle">
+        <span>Browse by city 📍</span>
+        <span class="toggle-icon">▲</span>
+      </button>
+      <div class="footer-content" id="footerContent">
+        <div id="mobileLocationsList" class="location-tags">
+          <p class="loading">Loading cities...</p>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <div class="container">
         <div class="footer-content">
@@ -210,8 +236,10 @@
       </div>
     </footer>
 
+    <script src="/scripts/navigation.js"></script>
     <script src="/scripts/cities.js"></script>
     <script src="/scripts/auth.js"></script>
+    <script src="/scripts/browse-mobile.js"></script>
     <script src="/scripts/app.js"></script>
   </body>
 </html>

@@ -39,16 +39,6 @@ const cityMappings = [
   { key: "vancouverwa", label: "Vancouver, WA" },
 ];
 
-const categories = [
-  "coffee-shop",
-  "transit",
-  "bar",
-  "bookstore",
-  "gym",
-  "event",
-  "other",
-];
-
 const titles = [
   "Blue Hair and Queer History",
   "Wrong Stop on Purpose",
@@ -200,7 +190,6 @@ async function generatePosts() {
       posts.push({
         cityKey: cityMapping.key,
         location: cityMapping.label,
-        category: randomFrom(categories),
         title: randomFrom(titles),
         description: randomFrom(descriptions),
         postedAt,
@@ -218,14 +207,13 @@ async function generatePosts() {
       await client.query(
         `
         INSERT INTO posts
-          (location, category, title, description, posted_at, expires_at,
-           management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted)
+          (location, title, description, posted_at, expires_at,
+           management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
         VALUES
           ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         `,
         [
           post.location,
-          post.category,
           post.title,
           post.description,
           post.postedAt,
@@ -235,6 +223,7 @@ async function generatePosts() {
           post.relayEmail,
           post.contactEmailEncrypted,
           false,
+          post.cityKey,
         ]
       );
     }

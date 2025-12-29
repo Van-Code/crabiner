@@ -2,7 +2,6 @@
 let currentPage = 1;
 let currentLocation = "";
 let currentCityKey = "";
-let currentCategory = "";
 let currentSearchQuery = "";
 let currentView = "list"; // 'list' or 'map'
 let map = null;
@@ -12,7 +11,6 @@ let allPosts = []; // Store posts for map view
 // DOM Elements
 const postsContainer = document.getElementById("posts");
 const cityFilter = document.getElementById("cityFilter");
-const categoryFilter = document.getElementById("categoryFilter");
 const prevPageBtn = document.getElementById("prevPage");
 const nextPageBtn = document.getElementById("nextPage");
 const pageInfo = document.getElementById("pageInfo");
@@ -63,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     searchBtn.addEventListener("click", () => {
       currentSearchQuery = searchQuery.value.trim();
       currentCityKey = cityFilter.value;
-      currentCategory = categoryFilter.value;
       currentPage = 1;
       updateURL();
 
@@ -80,10 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
     clearBtn.addEventListener("click", () => {
       searchQuery.value = "";
       cityFilter.value = "";
-      categoryFilter.value = "";
       currentSearchQuery = "";
       currentCityKey = "";
-      currentCategory = "";
       currentPage = 1;
       updateURL();
 
@@ -203,10 +198,6 @@ async function loadPostsForMap() {
       baseParams.append("cityKey", currentCityKey);
     }
 
-    if (currentCategory) {
-      baseParams.append("category", currentCategory);
-    }
-
     let page = 1;
     let hasMore = true;
     const collected = [];
@@ -284,7 +275,6 @@ function createPopupContent(post) {
   return `
     <div class="post-popup">
       <h4>${escapeHtml(post.title)}</h4>
-      <p><strong>Category:</strong> ${escapeHtml(post.category || "Other")}</p>
       <p>${escapeHtml(description)}</p>
       <a href="/view.html?id=${post.id}">View full post →</a>
     </div>
@@ -350,10 +340,6 @@ function updateURL() {
 
   if (currentCityKey) {
     params.set("cityKey", currentCityKey);
-  }
-
-  if (currentCategory) {
-    params.set("category", currentCategory);
   }
 
   if (currentSearchQuery) {
@@ -485,10 +471,6 @@ async function loadPosts() {
       params.append("cityKey", currentCityKey);
     }
 
-    if (currentCategory) {
-      params.append("category", currentCategory);
-    }
-
     const finalUrl = `${endpoint}?${params}`;
 
     const response = await fetch(finalUrl);
@@ -503,14 +485,13 @@ async function loadPosts() {
     updatePagination(data.hasMore);
 
     // Show search results count
-    if (currentSearchQuery || currentCityKey || currentCategory) {
+    if (currentSearchQuery || currentCityKey) {
       const filters = [];
       if (currentSearchQuery) filters.push(`"${currentSearchQuery}"`);
       if (currentCityKey) {
         const city = getCityByKey(currentCityKey);
         filters.push(`city: ${city ? city.label : currentCityKey}`);
       }
-      if (currentCategory) filters.push(`category: ${currentCategory}`);
 
       const resultsText =
         data.posts.length === 0

@@ -17,7 +17,7 @@ export async function checkContentSafety(text, postId = null) {
 
   // Get active safe words
   const result = await query(
-    `SELECT word, category, severity, action 
+    `SELECT word, severity, action 
      FROM safe_words 
      WHERE is_active = TRUE`
   );

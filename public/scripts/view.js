@@ -38,11 +38,6 @@ function displayPost(post) {
       <h1 class="post-detail-title">${escapeHtml(post.title)}</h1>
       <div class="post-meta">
         <span class="location">📍 ${escapeHtml(post.location)}</span>
-        ${
-          post.category
-            ? `<span class="category">${escapeHtml(post.category)}</span>`
-            : ""
-        }
       </div>
       <p class="post-description">${escapeHtml(post.description)}</p>
       <div class="post-footer">

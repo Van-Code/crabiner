@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const citiesByRegion = getCitiesByRegion();
 
   // Add cities grouped by region
-  Object.keys(citiesByRegion).forEach(region => {
+  Object.keys(citiesByRegion).forEach((region) => {
     const optgroup = document.createElement("optgroup");
     optgroup.label = region;
 
-    citiesByRegion[region].forEach(city => {
+    citiesByRegion[region].forEach((city) => {
       const option = document.createElement("option");
       option.value = city.key;
       option.textContent = city.displayLabel;
@@ -52,7 +52,6 @@ form.addEventListener("submit", async (e) => {
     const formData = {
       cityKey: cityKey,
       location: city.displayLabel, // Keep location for backward compatibility
-      category: document.getElementById("category").value,
       title: document.getElementById("title").value,
       description: document.getElementById("description").value,
       expiresInDays: parseInt(document.getElementById("expiresInDays").value),

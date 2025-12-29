@@ -5,258 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crabiner - Missed Connections for Queers</title>
     <link rel="stylesheet" href="/styles/styles.css" />
-    <!-- <link rel="stylesheet" href="/styles/hero.css" /> -->
-
-    <style>
-      .hero-demo {
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 22px 16px 10px;
-      }
-
-      .demo-stage {
-        position: relative;
-        /* background: linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0.96),
-          rgba(255, 255, 255, 0.98)
-        ); */
-        border-radius: 20px;
-        padding: 12px;
-      }
-      .demo-stage::before {
-        content: "";
-        display: block;
-        height: 460px;
-      }
-      @media (min-width: 820px) {
-        .demo-stage::before {
-          height: 380px;
-        }
-      }
-
-      /* Each pair sits on top of each other and fades in/out */
-      .demo-pair {
-        position: absolute;
-        inset: 0;
-        display: grid;
-        gap: 14px;
-        align-items: start;
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      /* Desktop: post + reply side-by-side */
-      @media (min-width: 820px) {
-        .demo-pair {
-          grid-template-columns: 1.1fr 0.9fr;
-          gap: 16px;
-        }
-        .demo-pair .demo-reply {
-          margin-top: 24px;
-        }
-      }
-
-      .demo-card {
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        background: rgba(255, 255, 255, 1);
-        border-radius: 18px;
-        padding: 16px 16px 14px;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1),
-          0 2px 6px rgba(0, 0, 0, 0.06);
-        color: #111;
-      }
-
-      .demo-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        letter-spacing: 0.2px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.06);
-        margin-bottom: 10px;
-      }
-
-      .demo-badge-reply {
-        background: rgba(255, 255, 255, 0.1);
-      }
-
-      .demo-meta {
-        font-size: 13px;
-        opacity: 0.9;
-        margin-bottom: 8px;
-      }
-
-      .demo-title {
-        font-size: 18px;
-        margin: 0 0 8px 0;
-        line-height: 1.2;
-      }
-
-      .demo-body {
-        margin: 0 0 12px 0;
-        font-size: 14px;
-        line-height: 1.45;
-        opacity: 0.95;
-      }
-
-      .demo-chiprow {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .demo-chip {
-        font-size: 12px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.07);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-
-      .demo-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      .demo-btn {
-        appearance: none;
-        border: 0;
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 13px;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.92);
-        color: rgba(10, 10, 12, 0.95);
-      }
-
-      .demo-btn-ghost {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.92);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-      }
-
-      /* Pair timing: 3 pairs, 18s total. Each pair: post appears, then reply, then fade out. */
-      .pair1 {
-        animation: pairCycle 27s ease-in-out infinite;
-        animation-delay: 0s;
-      }
-      .pair2 {
-        animation: pairCycle 27s ease-in-out infinite;
-        animation-delay: 9s;
-      }
-      .pair3 {
-        animation: pairCycle 27s ease-in-out infinite;
-        animation-delay: 18s;
-      }
-
-      @keyframes pairCycle {
-        0% {
-          opacity: 0;
-          transform: translateY(10px) scale(0.995);
-        }
-        8% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-        72% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-        92% {
-          opacity: 0;
-          transform: translateY(-6px) scale(0.995);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-6px) scale(0.995);
-        }
-      }
-
-      /* Within a visible pair: post comes in first, reply follows */
-      .demo-post {
-        animation: demoPostIn 18s ease-in-out infinite;
-      }
-      .demo-reply {
-        animation: demoReplyIn 18s ease-in-out infinite;
-      }
-
-      /* These keyframes assume the pair is "active" for ~6s. The pair container handles global timing.
-     We keep subtle motion so it still looks nice even though the pair is already faded in. */
-      @keyframes pairCycle {
-        0% {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        10% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        75% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        90% {
-          opacity: 0;
-          transform: translateY(-6px);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-6px);
-        }
-      }
-
-      @keyframes demoReplyIn {
-        0% {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        25% {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        40% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        75% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        90% {
-          opacity: 0;
-          transform: translateY(-4px);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(-4px);
-        }
-      }
-
-      /* Accessibility: respect reduced motion */
-      @media (prefers-reduced-motion: reduce) {
-        .demo-pair,
-        .demo-post,
-        .demo-reply {
-          animation: none !important;
-          opacity: 1 !important;
-          transform: none !important;
-          position: static;
-          pointer-events: auto;
-        }
-        .demo-stage {
-          display: grid;
-          gap: 16px;
-        }
-        .demo-stage::before {
-          display: none;
-        }
-      }
-    </style>
   </head>
   <body>
     <!-- Top Navigation Bar -->
@@ -289,36 +37,27 @@
             <span class="wave">👋</span> You already met. This helps you
             reconnect.
           </h1>
-          <!-- <div class="hero-graphic">
-            <div class="graphic-container">
-              <img class="hero-logo" src="images/crabiner_logo.png" />
-            </div>
-          </div> -->
-          <!-- Clickable, pausable screenshot carousel (no JS frameworks) -->
-          <section
-            class="hero-shot-carousel"
-            aria-label="Example Crabiner moments"
-          >
+          <div class="hero-shot-carousel" aria-label="Example Crabiner moments">
             <div class="carousel" data-paused="false">
               <div class="carousel-frame">
                 <img
                   class="carousel-shot"
-                  src="/images/hero/shot-1.jpg"
-                  alt="Example post and reply: Same book, same moment"
+                  src="/images/hero/shot-1.png"
+                  alt="Example moment and reply: Our dogs played together"
                   loading="eager"
                   decoding="async"
                 />
                 <img
                   class="carousel-shot"
-                  src="/images/hero/shot-2.jpg"
-                  alt="Example post and reply: Wrong stop on purpose"
+                  src="/images/hero/shot-2.png"
+                  alt="Example moment and reply: Wrong stop on purpose"
                   loading="lazy"
                   decoding="async"
                 />
                 <img
                   class="carousel-shot"
-                  src="/images/hero/shot-3.jpg"
-                  alt="Example post and reply: Lost in the crowd"
+                  src="/images/hero/shot-3.png"
+                  alt="Example moment and reply: Queerchata at El Rio"
                   loading="lazy"
                   decoding="async"
                 />
@@ -383,7 +122,7 @@
 
               <p class="carousel-caption">These are moments, not profiles.</p>
             </div>
-          </section>
+          </div>
 
           <style>
             .hero-shot-carousel {
@@ -400,19 +139,19 @@
             .carousel-frame {
               position: relative;
               width: 100%;
-              aspect-ratio: 16 / 9;
+              aspect-ratio: 16 / 8;
               border-radius: 20px;
-              overflow: hidden;
+              /* overflow: hidden;
               background: rgba(255, 255, 255, 0.96);
-              box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+              box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1); */
             }
 
             .carousel-shot {
               position: absolute;
               inset: 0;
               width: 100%;
-              height: 100%;
-              object-fit: cover;
+              height: auto;
+              object-fit: contain;
               opacity: 0;
               transform: scale(1.01);
               transition: opacity 300ms ease, transform 800ms ease;
@@ -518,7 +257,6 @@
                   );
                 });
 
-                // If the user manually navigates, pause autoplay (feels respectful)
                 if (userAction) {
                   setPaused(true);
                 }
@@ -569,7 +307,6 @@
 
               pauseBtn.addEventListener("click", () => setPaused(!paused));
 
-              // Pause on hover (nice on desktop) but do not permanently pause
               root.addEventListener("mouseenter", () => {
                 if (!paused) {
                   if (timer) clearInterval(timer);
@@ -600,7 +337,7 @@
 
           <p class="hero-subtitle">
             A space for queer people to find someone they already crossed paths
-            with. No profiles. No cold intros. Just real moments.
+            with. <br />No profiles. No cold intros. Just real moments.
           </p>
 
           <p class="hero-description">
@@ -689,12 +426,6 @@
             <div class="feature-icon">⏰</div>
             <h3>Auto-Expiring Posts</h3>
             <p>Moments fade after 7 to 30 days. Nothing lingers forever.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">🛡️</div>
-            <h3>Safe & Moderated</h3>
-            <p>Report inappropriate posts. Community-driven safety.</p>
           </div>
 
           <div class="feature-card">

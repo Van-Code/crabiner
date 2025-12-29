@@ -20,18 +20,16 @@ router.get(
   "/search",
   query("q").optional().trim().isLength({ max: 200 }),
   query("page").optional().isInt({ min: 1 }),
-  query("category").optional(),
   query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const { q, page = 1, location, category, cityKey } = req.query;
+      const { q, page = 1, location, cityKey } = req.query;
 
       const results = await searchPosts({
         queryString: q,
         page: parseInt(page),
         location,
-        category,
         cityKey,
       });
 
@@ -74,16 +72,14 @@ router.get("/popular-searches", async (req, res, next) => {
 router.get(
   "/",
   query("page").optional().isInt({ min: 1 }),
-  query("category").optional().trim(),
   query("cityKey").optional().trim().isLength({ max: 50 }),
   validateRequest,
   async (req, res, next) => {
     try {
-      const { page = 1, location, category, cityKey } = req.query;
+      const { page = 1, location, cityKey } = req.query;
       const posts = await getPosts({
         page: parseInt(page),
         location,
-        category,
         cityKey,
       });
       res.json(posts);
@@ -112,18 +108,6 @@ router.post(
   postRateLimiter,
   body("location").trim().isLength({ min: 2, max: 100 }),
   body("cityKey").optional().trim().isLength({ max: 50 }),
-  body("category")
-    .optional()
-    .trim()
-    .isIn([
-      "coffee-shop",
-      "transit",
-      "bar",
-      "bookstore",
-      "gym",
-      "event",
-      "other",
-    ]),
   body("title").trim().isLength({ min: 1, max: 100 }),
   body("description").trim().isLength({ min: 10, max: 2000 }),
   body("expiresInDays").isInt({ min: 7, max: 30 }),

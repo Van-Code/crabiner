@@ -1022,13 +1022,6 @@ header .container {
   font-weight: 600;
 }
 
-.category {
-  background: var(--bg);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  color: var(--text-light);
-}
 .post-title {
   font-size: 1.25rem;
   font-weight: 600;

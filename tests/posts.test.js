@@ -39,13 +39,12 @@ async function testCityCountsNonZero() {
 
   const result = await client.query(
     `INSERT INTO posts
-     (location, category, title, description, posted_at, expires_at,
+     (location, title, description, posted_at, expires_at,
       management_token_hash, session_token, is_deleted, city_key)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
      RETURNING id`,
     [
       "San Francisco, CA",
-      "coffee-shop",
       "Test Post",
       "This is a test post for city counts",
       now,
@@ -70,9 +69,15 @@ async function testCityCountsNonZero() {
 
   assert(countsResult.rows.length > 0, "Should return at least one city");
   assert(countsResult.rows[0].city_key === "sf", "Should return SF city");
-  assert(parseInt(countsResult.rows[0].count) > 0, "Count should be greater than 0");
+  assert(
+    parseInt(countsResult.rows[0].count) > 0,
+    "Count should be greater than 0"
+  );
 
-  console.log("✓ PASSED: City counts returns non-zero for SF:", countsResult.rows[0].count);
+  console.log(
+    "✓ PASSED: City counts returns non-zero for SF:",
+    countsResult.rows[0].count
+  );
 }
 
 // Test 2: Verify expired posts are excluded from counts
@@ -87,13 +92,12 @@ async function testExpiredPostsExcluded() {
 
   const result = await client.query(
     `INSERT INTO posts
-     (location, category, title, description, posted_at, expires_at,
+     (location, title, description, posted_at, expires_at,
       management_token_hash, session_token, is_deleted, city_key)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
      RETURNING id`,
     [
       "Oakland, CA",
-      "bar",
       "Expired Test Post",
       "This is an expired test post",
       expiredDate,
@@ -130,7 +134,8 @@ async function testExpiredPostsExcluded() {
 
     assert(
       activeOaklandPosts.rows.length < allOaklandPosts.rows.length ||
-        (activeOaklandPosts.rows.length === 0 && allOaklandPosts.rows.length > 0),
+        (activeOaklandPosts.rows.length === 0 &&
+          allOaklandPosts.rows.length > 0),
       "Expired posts should not be counted in active posts"
     );
   }
@@ -150,13 +155,12 @@ async function testDeletedPostsExcluded() {
 
   const result = await client.query(
     `INSERT INTO posts
-     (location, category, title, description, posted_at, expires_at,
+     (location, title, description, posted_at, expires_at,
       management_token_hash, session_token, is_deleted, city_key)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, $9)
      RETURNING id`,
     [
       "Berkeley, CA",
-      "event",
       "Deleted Test Post",
       "This is a deleted test post",
       now,
@@ -189,7 +193,8 @@ async function testDeletedPostsExcluded() {
 
   assert(
     activeBerkeleyPosts.rows.length < allBerkeleyPosts.rows.length ||
-      (activeBerkeleyPosts.rows.length === 0 && allBerkeleyPosts.rows.length > 0),
+      (activeBerkeleyPosts.rows.length === 0 &&
+        allBerkeleyPosts.rows.length > 0),
     "Deleted posts should not be counted"
   );
 
@@ -198,7 +203,9 @@ async function testDeletedPostsExcluded() {
 
 // Test 4: Verify browse filter by city_key returns only matching posts
 async function testBrowseFilterByCityKey() {
-  console.log("\n[TEST 4] Browse filter by city_key returns only matching posts");
+  console.log(
+    "\n[TEST 4] Browse filter by city_key returns only matching posts"
+  );
 
   // Create posts for different cities
   const now = new Date();
@@ -210,13 +217,12 @@ async function testBrowseFilterByCityKey() {
 
   const sfPost = await client.query(
     `INSERT INTO posts
-     (location, category, title, description, posted_at, expires_at,
+     (location, title, description, posted_at, expires_at,
       management_token_hash, session_token, is_deleted, city_key)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
      RETURNING id`,
     [
       "San Francisco, CA",
-      "coffee-shop",
       "SF Test Post",
       "San Francisco test post",
       now,
@@ -229,13 +235,12 @@ async function testBrowseFilterByCityKey() {
 
   const oaklandPost = await client.query(
     `INSERT INTO posts
-     (location, category, title, description, posted_at, expires_at,
+     (location, title, description, posted_at, expires_at,
       management_token_hash, session_token, is_deleted, city_key)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
      RETURNING id`,
     [
       "Oakland, CA",
-      "bar",
       "Oakland Test Post",
       "Oakland test post",
       now,
@@ -258,12 +263,17 @@ async function testBrowseFilterByCityKey() {
   );
 
   // Verify all returned posts are for SF
-  sfPosts.rows.forEach(post => {
-    assert(post.city_key === "sf", `Post ${post.id} should be for SF but is ${post.city_key}`);
+  sfPosts.rows.forEach((post) => {
+    assert(
+      post.city_key === "sf",
+      `Post ${post.id} should be for SF but is ${post.city_key}`
+    );
   });
 
   // Verify the Oakland post is not in the results
-  const oaklandInResults = sfPosts.rows.find(p => p.id === oaklandPost.rows[0].id);
+  const oaklandInResults = sfPosts.rows.find(
+    (p) => p.id === oaklandPost.rows[0].id
+  );
   assert(!oaklandInResults, "Oakland post should not be in SF results");
 
   console.log("✓ PASSED: Browse filter returns only matching city posts");
@@ -271,22 +281,24 @@ async function testBrowseFilterByCityKey() {
 
 // Test 5: Test deterministic jitter function
 async function testDeterministicJitter() {
-  console.log("\n[TEST 5] Deterministic jitter generates consistent coordinates");
+  console.log(
+    "\n[TEST 5] Deterministic jitter generates consistent coordinates"
+  );
 
   // Import the jitter function (we'll simulate it here)
   function generatePinJitter(postId) {
     let hash = 0;
     for (let i = 0; i < postId.length; i++) {
       const char = postId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
 
     const seed1 = Math.abs(hash);
     const seed2 = Math.abs(hash >> 16);
 
-    const latOffset = ((seed1 % 2000) / 100000) - 0.01;
-    const lngOffset = ((seed2 % 2000) / 100000) - 0.01;
+    const latOffset = (seed1 % 2000) / 100000 - 0.01;
+    const lngOffset = (seed2 % 2000) / 100000 - 0.01;
 
     return { latOffset, lngOffset };
   }
@@ -295,12 +307,24 @@ async function testDeterministicJitter() {
   const jitter1 = generatePinJitter(testPostId);
   const jitter2 = generatePinJitter(testPostId);
 
-  assert(jitter1.latOffset === jitter2.latOffset, "Lat offset should be deterministic");
-  assert(jitter1.lngOffset === jitter2.lngOffset, "Lng offset should be deterministic");
+  assert(
+    jitter1.latOffset === jitter2.latOffset,
+    "Lat offset should be deterministic"
+  );
+  assert(
+    jitter1.lngOffset === jitter2.lngOffset,
+    "Lng offset should be deterministic"
+  );
 
   // Verify jitter is within expected range
-  assert(Math.abs(jitter1.latOffset) <= 0.01, "Lat offset should be within +/- 0.01");
-  assert(Math.abs(jitter1.lngOffset) <= 0.01, "Lng offset should be within +/- 0.01");
+  assert(
+    Math.abs(jitter1.latOffset) <= 0.01,
+    "Lat offset should be within +/- 0.01"
+  );
+  assert(
+    Math.abs(jitter1.lngOffset) <= 0.01,
+    "Lng offset should be within +/- 0.01"
+  );
 
   console.log("✓ PASSED: Jitter function is deterministic and within range");
 }

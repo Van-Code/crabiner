@@ -5,17 +5,20 @@ This guide covers the deployment of the new List/Map view toggle and city-based 
 ## Features Added
 
 1. **List/Map Toggle on Browse Page**
+
    - Toggle between List and Map view with buttons
    - View preference persisted in URL query string (`?view=list` or `?view=map`)
    - Default view is List
 
 2. **Interactive Map View**
+
    - Uses Leaflet.js with OpenStreetMap tiles
    - Displays posts as pins with deterministic jittering based on post ID
-   - Hoverable tooltips showing post title, category, description snippet, and link
+   - Hoverable tooltips showing post title, description snippet, and link
    - Auto-fits map bounds to show all pins
 
 3. **City Selector (Craigslist-style)**
+
    - Replaced free-text location input with structured city selector
    - Predefined cities grouped by region:
      - SF Bay Area: San Francisco, Oakland, Berkeley, San Jose
@@ -42,6 +45,7 @@ psql $DATABASE_URL -f db/migrations/001_add_city_key.sql
 ```
 
 This migration:
+
 - Adds `city_key` VARCHAR(50) column to posts table
 - Creates index on `city_key` for efficient filtering
 - Backfills existing posts with city keys based on location text
@@ -56,9 +60,10 @@ node seed_posts.js
 ```
 
 This will:
+
 - Create 50 test posts distributed across all cities
 - Each post assigned a random city from the predefined list
-- Display summary of posts by category and city
+- Display summary of posts by city
 
 ## Running Tests
 
@@ -77,6 +82,7 @@ node tests/posts.test.js
 5. **testDeterministicJitter**: Confirms map pin jitter is consistent for same post ID
 
 Expected output:
+
 ```
 === Running Crabiner Posts Tests ===
 
@@ -113,6 +119,7 @@ No new npm packages required. Using CDN for Leaflet:
 ### New Endpoint
 
 **GET /api/posts/city-counts**
+
 - Returns count of active posts grouped by city_key
 - Response format:
   ```json
@@ -127,13 +134,13 @@ No new npm packages required. Using CDN for Leaflet:
 ### Modified Endpoints
 
 **POST /api/posts**
+
 - Now accepts `cityKey` field (optional)
 - Example:
   ```json
   {
     "cityKey": "sf",
     "location": "San Francisco, CA",
-    "category": "coffee-shop",
     "title": "Coffee Shop Connection",
     "description": "...",
     "expiresInDays": 14
@@ -142,6 +149,7 @@ No new npm packages required. Using CDN for Leaflet:
 
 **GET /api/posts**
 **GET /api/posts/search**
+
 - Now accept `cityKey` query parameter for filtering
 - Examples:
   - `/api/posts?cityKey=sf`
@@ -150,15 +158,18 @@ No new npm packages required. Using CDN for Leaflet:
 ## Files Changed
 
 ### Database
+
 - `db/migrations/001_add_city_key.sql` - Migration for city_key column
 - `seed_posts.js` - Updated to use city mappings
 
 ### Backend
+
 - `src/constants/cities.js` - New city constants and utilities
 - `src/services/postService.js` - Updated to handle city_key filtering
 - `src/routes/posts.js` - Added city-counts endpoint, validation
 
 ### Frontend
+
 - `public/browse.html` - Added map view container, city filter, view toggle
 - `public/post.html` - Replaced location input with city selector
 - `public/scripts/cities.js` - Client-side city constants and utilities
@@ -166,23 +177,27 @@ No new npm packages required. Using CDN for Leaflet:
 - `public/scripts/post.js` - City selector population
 
 ### Tests
+
 - `tests/posts.test.js` - New test suite for city filtering and counts
 
 ## Testing the Features
 
 ### 1. Test Create Post with City Selector
+
 - Navigate to `/post.html`
 - Verify city selector shows cities grouped by region
 - Create a post selecting "San Francisco, CA"
 - Verify post is created successfully
 
 ### 2. Test Browse List View
+
 - Navigate to `/browse.html`
 - Verify "Browse by city" sidebar shows counts for cities with posts
 - Click a city in sidebar - verify filter applies
 - Verify count numbers are non-zero and accurate
 
 ### 3. Test Browse Map View
+
 - Click "Map" button on browse page
 - Verify map loads with OpenStreetMap tiles
 - Verify pins appear for posts
@@ -190,12 +205,14 @@ No new npm packages required. Using CDN for Leaflet:
 - Click "View full post" link - verify navigation works
 
 ### 4. Test City Filtering
+
 - Select a city from the city dropdown filter
 - Click Search
 - Verify only posts from that city appear
 - Test in both List and Map views
 
 ### 5. Test View Toggle Persistence
+
 - Switch to Map view
 - Note URL changes to `?view=map`
 - Refresh page
@@ -206,6 +223,7 @@ No new npm packages required. Using CDN for Leaflet:
 If issues arise, rollback can be performed:
 
 1. **Database rollback**:
+
    ```sql
    DROP INDEX IF EXISTS idx_posts_city_key;
    ALTER TABLE posts DROP COLUMN IF EXISTS city_key;

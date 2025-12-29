@@ -5,7 +5,6 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location VARCHAR(100) NOT NULL,
-  category VARCHAR(50),
   title VARCHAR(50) NOT NULL,
   description TEXT NOT NULL,
   posted_at TIMESTAMP DEFAULT NOW(),
@@ -14,14 +13,17 @@ CREATE TABLE posts (
   relay_email VARCHAR(100) UNIQUE NOT NULL,
   contact_email_encrypted TEXT NOT NULL,
   is_deleted BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW(),
+  city_key VARCHAR(50) NOT NULL
 );
 
 -- Indexes for performance
 CREATE INDEX idx_posts_expires ON posts(expires_at) WHERE is_deleted = FALSE;
 CREATE INDEX idx_posts_location ON posts(location) WHERE is_deleted = FALSE;
+CREATE INDEX idx_posts_city_key ON posts(city_key) WHERE is_deleted = FALSE;
 CREATE INDEX idx_posts_posted_at ON posts(posted_at DESC) WHERE is_deleted = FALSE;
 CREATE INDEX idx_relay_email ON posts(relay_email);
+
 
 -- Optional: Replies table for in-app inbox (if not using email relay)
 CREATE TABLE replies (

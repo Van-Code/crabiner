@@ -9,4 +9,5 @@ coverage/
 .idea/
 src/seed_posts.js
 package-lock.json
-0.txt
+0.md
+db/run_all.sh

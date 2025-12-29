@@ -22,13 +22,6 @@ async function loadRecentPosts() {
           }'">
             <div class="preview-meta">
               <span class="location">📍 ${escapeHtml(post.location)}</span>
-              ${
-                post.category
-                  ? `<span class="category-tag">${escapeHtml(
-                      post.category
-                    )}</span>`
-                  : ""
-              }
             </div>
             <p class="preview-description">${escapeHtml(
               post.title.substring(0, 150)

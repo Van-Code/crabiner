@@ -3,8 +3,260 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Crabiner - Missed Connections for Sapphics</title>
+    <title>Crabiner - Missed Connections for Queers</title>
     <link rel="stylesheet" href="/styles/styles.css" />
+    <!-- <link rel="stylesheet" href="/styles/hero.css" /> -->
+
+    <style>
+      .hero-demo {
+        width: 100%;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 22px 16px 10px;
+      }
+
+      .demo-stage {
+        position: relative;
+        /* background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.96),
+          rgba(255, 255, 255, 0.98)
+        ); */
+        border-radius: 20px;
+        padding: 12px;
+      }
+      .demo-stage::before {
+        content: "";
+        display: block;
+        height: 460px;
+      }
+      @media (min-width: 820px) {
+        .demo-stage::before {
+          height: 380px;
+        }
+      }
+
+      /* Each pair sits on top of each other and fades in/out */
+      .demo-pair {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        gap: 14px;
+        align-items: start;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Desktop: post + reply side-by-side */
+      @media (min-width: 820px) {
+        .demo-pair {
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 16px;
+        }
+        .demo-pair .demo-reply {
+          margin-top: 24px;
+        }
+      }
+
+      .demo-card {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 1);
+        border-radius: 18px;
+        padding: 16px 16px 14px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1),
+          0 2px 6px rgba(0, 0, 0, 0.06);
+        color: #111;
+      }
+
+      .demo-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.2px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
+        margin-bottom: 10px;
+      }
+
+      .demo-badge-reply {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .demo-meta {
+        font-size: 13px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+      }
+
+      .demo-title {
+        font-size: 18px;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+      }
+
+      .demo-body {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        line-height: 1.45;
+        opacity: 0.95;
+      }
+
+      .demo-chiprow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .demo-chip {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .demo-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .demo-btn {
+        appearance: none;
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.92);
+        color: rgba(10, 10, 12, 0.95);
+      }
+
+      .demo-btn-ghost {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+      }
+
+      /* Pair timing: 3 pairs, 18s total. Each pair: post appears, then reply, then fade out. */
+      .pair1 {
+        animation: pairCycle 27s ease-in-out infinite;
+        animation-delay: 0s;
+      }
+      .pair2 {
+        animation: pairCycle 27s ease-in-out infinite;
+        animation-delay: 9s;
+      }
+      .pair3 {
+        animation: pairCycle 27s ease-in-out infinite;
+        animation-delay: 18s;
+      }
+
+      @keyframes pairCycle {
+        0% {
+          opacity: 0;
+          transform: translateY(10px) scale(0.995);
+        }
+        8% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        72% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        92% {
+          opacity: 0;
+          transform: translateY(-6px) scale(0.995);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-6px) scale(0.995);
+        }
+      }
+
+      /* Within a visible pair: post comes in first, reply follows */
+      .demo-post {
+        animation: demoPostIn 18s ease-in-out infinite;
+      }
+      .demo-reply {
+        animation: demoReplyIn 18s ease-in-out infinite;
+      }
+
+      /* These keyframes assume the pair is "active" for ~6s. The pair container handles global timing.
+     We keep subtle motion so it still looks nice even though the pair is already faded in. */
+      @keyframes pairCycle {
+        0% {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        10% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        75% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        90% {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+      }
+
+      @keyframes demoReplyIn {
+        0% {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        25% {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        75% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        90% {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+      }
+
+      /* Accessibility: respect reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        .demo-pair,
+        .demo-post,
+        .demo-reply {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+          position: static;
+          pointer-events: auto;
+        }
+        .demo-stage {
+          display: grid;
+          gap: 16px;
+        }
+        .demo-stage::before {
+          display: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Top Navigation Bar -->
@@ -34,34 +286,333 @@
       <div class="container">
         <div class="hero-content">
           <h1 class="hero-title">
-            <span class="wave">👋</span> Did you see someone special?
+            <span class="wave">👋</span> You already met. This helps you
+            reconnect.
           </h1>
-          <div class="hero-graphic">
+          <!-- <div class="hero-graphic">
             <div class="graphic-container">
-              <!-- <div class="porcupine-left">🦀</div>
-              <div class="hearts">
-                <span class="heart">💕</span>
-                <span class="heart">💗</span>
-                <span class="heart">💖</span>
-              </div>
-              <div class="porcupine-right">🦀</div> -->
               <img class="hero-logo" src="images/crabiner_logo.png" />
             </div>
-          </div>
+          </div> -->
+          <!-- Clickable, pausable screenshot carousel (no JS frameworks) -->
+          <section
+            class="hero-shot-carousel"
+            aria-label="Example Crabiner moments"
+          >
+            <div class="carousel" data-paused="false">
+              <div class="carousel-frame">
+                <img
+                  class="carousel-shot"
+                  src="/images/hero/shot-1.jpg"
+                  alt="Example post and reply: Same book, same moment"
+                  loading="eager"
+                  decoding="async"
+                />
+                <img
+                  class="carousel-shot"
+                  src="/images/hero/shot-2.jpg"
+                  alt="Example post and reply: Wrong stop on purpose"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <img
+                  class="carousel-shot"
+                  src="/images/hero/shot-3.jpg"
+                  alt="Example post and reply: Lost in the crowd"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+
+              <div class="carousel-controls">
+                <button
+                  class="carousel-btn"
+                  type="button"
+                  id="carouselPrev"
+                  aria-label="Previous slide"
+                >
+                  ‹
+                </button>
+
+                <div
+                  class="carousel-dots"
+                  role="tablist"
+                  aria-label="Carousel slides"
+                >
+                  <button
+                    class="dot"
+                    type="button"
+                    data-index="0"
+                    aria-label="Go to slide 1"
+                    aria-current="true"
+                  ></button>
+                  <button
+                    class="dot"
+                    type="button"
+                    data-index="1"
+                    aria-label="Go to slide 2"
+                    aria-current="false"
+                  ></button>
+                  <button
+                    class="dot"
+                    type="button"
+                    data-index="2"
+                    aria-label="Go to slide 3"
+                    aria-current="false"
+                  ></button>
+                </div>
+
+                <button
+                  class="carousel-btn"
+                  type="button"
+                  id="carouselNext"
+                  aria-label="Next slide"
+                >
+                  ›
+                </button>
+
+                <button
+                  class="carousel-btn carousel-pause"
+                  type="button"
+                  id="carouselPause"
+                  aria-label="Pause autoplay"
+                >
+                  ⏸
+                </button>
+              </div>
+
+              <p class="carousel-caption">These are moments, not profiles.</p>
+            </div>
+          </section>
+
+          <style>
+            .hero-shot-carousel {
+              width: 100%;
+              max-width: 980px;
+              margin: 0 auto;
+              padding: 18px 16px 6px;
+            }
+
+            .carousel {
+              width: 100%;
+            }
+
+            .carousel-frame {
+              position: relative;
+              width: 100%;
+              aspect-ratio: 16 / 9;
+              border-radius: 20px;
+              overflow: hidden;
+              background: rgba(255, 255, 255, 0.96);
+              box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .carousel-shot {
+              position: absolute;
+              inset: 0;
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              opacity: 0;
+              transform: scale(1.01);
+              transition: opacity 300ms ease, transform 800ms ease;
+              user-select: none;
+              pointer-events: none;
+            }
+
+            .carousel-shot.is-active {
+              opacity: 1;
+              transform: scale(1);
+            }
+
+            .carousel-controls {
+              display: grid;
+              grid-template-columns: auto 1fr auto auto;
+              align-items: center;
+              gap: 10px;
+              margin-top: 10px;
+            }
+
+            .carousel-btn {
+              appearance: none;
+              border: 1px solid rgba(0, 0, 0, 0.1);
+              background: rgba(255, 255, 255, 0.92);
+              border-radius: 12px;
+              height: 38px;
+              width: 44px;
+              cursor: pointer;
+              font-size: 18px;
+              line-height: 1;
+              box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+            }
+
+            .carousel-btn:active {
+              transform: translateY(1px);
+            }
+
+            .carousel-pause {
+              width: 52px;
+              font-size: 16px;
+            }
+
+            .carousel-dots {
+              display: flex;
+              justify-content: center;
+              gap: 10px;
+            }
+
+            .dot {
+              appearance: none;
+              border: 0;
+              width: 10px;
+              height: 10px;
+              border-radius: 999px;
+              background: rgba(0, 0, 0, 0.22);
+              cursor: pointer;
+            }
+
+            .dot[aria-current="true"] {
+              background: rgba(0, 0, 0, 0.78);
+            }
+
+            .carousel-caption {
+              margin: 10px 0 0;
+              font-size: 13px;
+              opacity: 0.9;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+              .carousel-shot {
+                transition: none;
+                transform: none;
+              }
+            }
+          </style>
+
+          <script>
+            (() => {
+              const root = document.querySelector(".carousel");
+              if (!root) return;
+
+              const shots = Array.from(root.querySelectorAll(".carousel-shot"));
+              const dots = Array.from(root.querySelectorAll(".dot"));
+              const prevBtn = document.getElementById("carouselPrev");
+              const nextBtn = document.getElementById("carouselNext");
+              const pauseBtn = document.getElementById("carouselPause");
+
+              let index = 0;
+              let paused = false;
+              let timer = null;
+
+              function setActive(newIndex, { userAction = false } = {}) {
+                index = (newIndex + shots.length) % shots.length;
+
+                shots.forEach((img, i) => {
+                  img.classList.toggle("is-active", i === index);
+                });
+
+                dots.forEach((d, i) => {
+                  d.setAttribute(
+                    "aria-current",
+                    i === index ? "true" : "false"
+                  );
+                });
+
+                // If the user manually navigates, pause autoplay (feels respectful)
+                if (userAction) {
+                  setPaused(true);
+                }
+              }
+
+              function setPaused(val) {
+                paused = val;
+                root.dataset.paused = paused ? "true" : "false";
+                pauseBtn.textContent = paused ? "▶" : "⏸";
+                pauseBtn.setAttribute(
+                  "aria-label",
+                  paused ? "Resume autoplay" : "Pause autoplay"
+                );
+
+                if (paused) {
+                  if (timer) clearInterval(timer);
+                  timer = null;
+                } else {
+                  startAutoplay();
+                }
+              }
+
+              function startAutoplay() {
+                if (timer) return;
+                timer = setInterval(() => {
+                  if (!paused) setActive(index + 1);
+                }, 9000); // 9s per slide
+              }
+
+              // Init
+              setActive(0);
+              startAutoplay();
+
+              // Controls
+              prevBtn.addEventListener("click", () =>
+                setActive(index - 1, { userAction: true })
+              );
+              nextBtn.addEventListener("click", () =>
+                setActive(index + 1, { userAction: true })
+              );
+
+              dots.forEach((d) => {
+                d.addEventListener("click", () => {
+                  const i = Number(d.dataset.index);
+                  if (!Number.isNaN(i)) setActive(i, { userAction: true });
+                });
+              });
+
+              pauseBtn.addEventListener("click", () => setPaused(!paused));
+
+              // Pause on hover (nice on desktop) but do not permanently pause
+              root.addEventListener("mouseenter", () => {
+                if (!paused) {
+                  if (timer) clearInterval(timer);
+                  timer = null;
+                }
+              });
+
+              root.addEventListener("mouseleave", () => {
+                if (!paused) startAutoplay();
+              });
+
+              // Keyboard support
+              root.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowLeft")
+                  setActive(index - 1, { userAction: true });
+                if (e.key === "ArrowRight")
+                  setActive(index + 1, { userAction: true });
+                if (e.key === " ") {
+                  e.preventDefault();
+                  setPaused(!paused);
+                }
+              });
+
+              // Make the whole carousel focusable for keyboard users
+              root.setAttribute("tabindex", "0");
+            })();
+          </script>
+
           <p class="hero-subtitle">
-            A cozy corner of the internet for sapphic missed connections
+            A space for queer people to find someone they already crossed paths
+            with. No profiles. No cold intros. Just real moments.
           </p>
+
           <p class="hero-description">
-            For queer women & nonbinary folks who saw someone cute but were too
-            shy to say hi 🌈
+            Built for moments that happened offline. 🌈
           </p>
 
           <div class="hero-buttons">
             <a href="/browse.html" class="btn-primary-large">
-              <span>✨</span> Browse Posts
+              <span>✨</span> Browse Moments
             </a>
             <a href="/post.html" class="btn-secondary-large">
-              <span>💌</span> Post Your Connection
+              <span>💌</span> Post a Moment
             </a>
           </div>
         </div>
@@ -76,32 +627,32 @@
         <div class="steps-grid">
           <div class="step-card">
             <div class="step-icon">👀</div>
-            <h3>You saw someone</h3>
-            <p>
-              At a coffee shop, on the train, at a bookstore... somewhere in the
-              real world
-            </p>
+            <h3>Something already happened in real life</h3>
+            <p>You shared a real moment. You were both there.</p>
           </div>
 
           <div class="step-card">
             <div class="step-icon">✍️</div>
-            <h3>Post your story</h3>
-            <p>Share what you noticed about them. Be specific but sweet!</p>
-          </div>
-
-          <div class="step-card">
-            <div class="step-icon">🔔</div>
-            <h3>They might reply</h3>
+            <h3>You post the moment, not yourself</h3>
             <p>
-              If they see your post, they can message you privately through the
-              app
+              No profiles. No photos. No browsing people. Just the context
+              someone would recognize if it was them.
             </p>
           </div>
 
           <div class="step-card">
+            <div class="step-icon">🔔</div>
+            <h3>Recognition is the filter</h3>
+            <p>If it's them, they'll know. If it's not, nothing happens.</p>
+          </div>
+
+          <div class="step-card">
             <div class="step-icon">☕</div>
-            <h3>Connect IRL</h3>
-            <p>Exchange info and maybe grab coffee together!</p>
+            <h3>Then you decide what's next</h3>
+            <p>
+              Message in app. Exchange info if you want. Meet again if it feels
+              right.
+            </p>
           </div>
         </div>
       </div>
@@ -115,34 +666,29 @@
         <div class="features-grid">
           <div class="feature-card">
             <div class="feature-icon">🏳️‍🌈</div>
-            <h3>Sapphic-Only Space</h3>
+            <h3>Who this is for</h3>
             <p>
-              Built by and for queer women & nonbinary folks. No men allowed,
-              period.
+              Queer people navigating sapphic and queer social spaces. Not
+              intended for straight men.
             </p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">🔒</div>
-            <h3>Privacy First</h3>
-            <p>
-              No tracking, minimal data collection, anonymous posting. Your
-              privacy matters.
-            </p>
+            <h3>Privacy First By Design</h3>
+            <p>No profiles. No public identities. Minimal data, always.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">💬</div>
             <h3>In-App Messaging</h3>
-            <p>Messages go to your private inbox. No email relay needed.</p>
+            <p>Conversations stay here until you choose otherwise.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">⏰</div>
-            <h3>Auto-Expiring</h3>
-            <p>
-              Posts delete automatically after 7-30 days. Fresh content always.
-            </p>
+            <h3>Auto-Expiring Posts</h3>
+            <p>Moments fade after 7 to 30 days. Nothing lingers forever.</p>
           </div>
 
           <div class="feature-card">
@@ -153,8 +699,14 @@
 
           <div class="feature-card">
             <div class="feature-icon">✨</div>
-            <h3>No Accounts Required</h3>
-            <p>Post anonymously or sign in with Google for extra features.</p>
+            <h3>Actively Moderated</h3>
+            <p>Report anything off. Community safety comes first.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">✨</div>
+            <h3>No Account Required</h3>
+            <p>Post anonymously. Sign in only if you want extra features.</p>
           </div>
         </div>
       </div>
@@ -163,8 +715,10 @@
     <!-- Recent Posts Preview -->
     <section class="recent-posts-preview">
       <div class="container">
-        <h2 class="section-title">Recent connections 💕</h2>
-        <p class="section-subtitle">See who's looking for someone special...</p>
+        <h2 class="section-title">Recent moments</h2>
+        <p class="section-subtitle">
+          These are not ads. They’re real moments looking for the right person.
+        </p>
 
         <div id="recentPostsGrid" class="preview-grid">
           <p class="loading">Loading recent posts...</p>
@@ -181,9 +735,9 @@
       <div class="container">
         <div class="cta-content">
           <h2>Ready to reconnect? 🌈</h2>
-          <p>Post your missed connection and see if they find you!</p>
-          <a href="/post.html" class="btn-cta"> 💌 Post Your Connection </a>
-          <p class="cta-note">Free • Anonymous • Safe</p>
+          <p>Post what happened. The right person will recognize it.</p>
+          <a href="/post.html" class="btn-cta"> 💌 Post a Moment </a>
+          <p class="cta-note">Free • Anonymous • Community Moderated</p>
         </div>
       </div>
     </section>
@@ -195,7 +749,7 @@
           <h3>💕 Support Crabiner</h3>
           <p>
             This site is free and ad-free. If you'd like to support development
-            and hosting costs:
+            and hosting.
           </p>
           <a
             href="https://ko-fi.com/W7W71P0PEN"
@@ -211,7 +765,7 @@
             />
           </a>
           <p class="support-note">
-            Every coffee helps keep this sapphic space alive! ☕🦀
+            Every coffee helps keep this space alive! ☕🦀
           </p>
         </div>
       </div>
@@ -222,42 +776,16 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h4>Crabiner</h4>
-            <p>A safe space for sapphic missed connections</p>
-
-            <!-- Ko-fi button -->
-            <div class="kofi-container">
-              <a href="https://ko-fi.com/W7W71P0PEN" target="_blank">
-                <img
-                  height="36"
-                  style="border: 0px; height: 36px"
-                  src="https://storage.ko-fi.com/cdn/kofi4.png?v=6"
-                  border="0"
-                  alt="Buy Me a Coffee at ko-fi.com"
-                />
-              </a>
-              <p class="kofi-text">Help keep this site running! ☕</p>
-            </div>
-          </div>
-
-          <div class="footer-section">
             <h4>Quick Links</h4>
-            <a href="/browse.html">Browse Posts</a>
-            <a href="/post.html">Post a Connection</a>
+            <a href="/browse.html">Browse</a>
+            <a href="/post.html">Post a Moment</a>
             <a href="/guidelines.html">Community Guidelines</a>
-          </div>
-
-          <div class="footer-section">
-            <h4>About</h4>
-            <p>Privacy-focused • No tracking • Auto-expiring posts</p>
-            <p>Made with 💕 for the sapphic community</p>
           </div>
         </div>
 
         <div class="footer-bottom">
           <p>
-            &copy; 2025 Crabiner. Built with care for queer women & nonbinary
-            folks. 🏳️‍🌈
+            &copy; 2025 Crabiner. Built for and by queer & nonbinary folks. 🏳️‍🌈
           </p>
         </div>
       </div>

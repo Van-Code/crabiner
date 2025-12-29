@@ -27,7 +27,6 @@ A privacy-focused, safe space for **sapphic women and nonbinary people** to post
 
 - 🔍 **Full-Text Search** - Search posts by keywords
 - 📍 **Location Filtering** - Browse by neighborhood/area with autocomplete
-- 🏷️ **Category Tags** - Coffee shops, transit, bars, events, etc.
 - ⭐ **Popular Searches** - See what others are looking for
 - 📌 **Popular Locations** - Clickable location tags
 
@@ -165,8 +164,15 @@ SMTP_FROM=noreply@shyporcupine.com
 RELAY_DOMAIN=shyporcupine.com
 
 # Security (generate random 32+ character string)
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ENCRYPTION_KEY=your_32_byte_encryption_key_here_change_this
 ALLOWED_ORIGINS=http://localhost:3000,crabiner.vercel.app
+
+# GOOGLE OAuth
+GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+SESSION_SECRET=random_32_char_string
 
 # Rate Limiting
 MAX_POSTS_PER_DAY=5
@@ -273,7 +279,6 @@ Search posts by keywords
 - `q`: Search query
 - `page` (optional): Page number
 - `location` (optional): Filter by location
-- `category` (optional): Filter by category
 
 ### GET /api/posts/locations
 
@@ -292,7 +297,6 @@ Create new post (rate limited: 5/day per IP)
 ```json
 {
   "location": "The Castro, SF",
-  "category": "coffee-shop",
   "description": "You were reading a book...",
   "expiresInDays": 14
 }

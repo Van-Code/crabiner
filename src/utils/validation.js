@@ -22,17 +22,4 @@ export const validators = {
     const forbidden = ["<", ">", "script", "javascript:"];
     return !forbidden.some((word) => value.toLowerCase().includes(word));
   },
-
-  isValidCategory: (value) => {
-    const allowed = [
-      "coffee-shop",
-      "transit",
-      "bar",
-      "bookstore",
-      "gym",
-      "event",
-      "other",
-    ];
-    return allowed.includes(value);
-  },
 };

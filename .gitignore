@@ -11,3 +11,4 @@ src/seed_posts.js
 package-lock.json
 0.md
 db/run_all.sh
+public/shot-animation.html

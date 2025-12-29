@@ -229,15 +229,16 @@ header .container {
 }
 
 .hero-content {
-  max-width: 700px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
 .hero-title {
   font-size: 3rem;
   color: var(--text);
-  margin-bottom: 1rem;
+  margin:0 auto 1rem auto;
   line-height: 1.2;
+  max-width:700px;
 }
 
 .wave {

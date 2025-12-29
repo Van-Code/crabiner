@@ -87,7 +87,13 @@
           </a>
         </div>
 
-        <div class="nav-links">
+        <button class="hamburger-menu" id="hamburgerBtn" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
           <a href="/browse.html" class="nav-link">Browse</a>
           <a href="/guidelines.html" class="nav-link">Guidelines</a>
 
@@ -97,6 +103,7 @@
         </div>
       </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <main class="guidelines-content">
       <h1 class="emoji-header">🦔💕 Community Guidelines</h1>
@@ -340,6 +347,7 @@
         </div>
       </div>
     </footer>
+    <script type="text/javascript" src="/scripts/navigation.js"></script>
     <script type="text/javascript" src="/scripts/auth.js"></script>
   </body>
 </html>

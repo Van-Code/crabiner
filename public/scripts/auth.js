@@ -10,9 +10,10 @@ async function checkAuth() {
 
     if (data.authenticated) {
       authSection.innerHTML = `
+          <a href="/inbox.html" class="nav-link">Inbox</a>
           <div class="user-menu">
-            <img src="${data.user.profilePicture || "/default-avatar.png"}" 
-                 alt="${data.user.name}" 
+            <img src="${data.user.profilePicture || "/default-avatar.png"}"
+                 alt="${data.user.name}"
                  class="user-avatar">
             <span class="user-name">${data.user.name}</span>
             <div class="dropdown">
@@ -20,7 +21,7 @@ async function checkAuth() {
               <div class="dropdown-menu">
                 <a href="/my-posts.html">My Posts</a>
                 <a href="/saved.html">Saved Posts</a>
-                <a href="/auth/logout">Logout</a>
+                <a href="/auth/logout">Sign out</a>
               </div>
             </div>
           </div>
@@ -48,7 +49,6 @@ async function checkAuth() {
             </svg>
             Sign in with Google
           </a>
-          <p class="auth-note">Optional - posting works without an account</p>
         `;
 
       // Show error if login failed

@@ -4,7 +4,7 @@ import { generateToken } from "../utils/crypto.js";
 import { sendReplyNotification } from "./posterVerificationService.js";
 import logger from "../utils/logger.js";
 
-export async function sendReply(postId, message, replierEmail) {
+export async function sendReply(postId, message, replierEmail, userId) {
   // Verify post exists and is active
   const post = await getPostById(postId);
 
@@ -19,16 +19,16 @@ export async function sendReply(postId, message, replierEmail) {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30);
 
-  // Store message in database
+  // Store message in database with user_id
   const result = await query(
-    `INSERT INTO replies 
-     (post_id, message, replier_email, replier_session_token, expires_at)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO replies
+     (post_id, message, replier_email, replier_session_token, expires_at, user_id)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING id`,
-    [postId, message, replierEmail, replierSessionToken, expiresAt]
+    [postId, message, replierEmail, replierSessionToken, expiresAt, userId]
   );
 
-  logger.info("Reply sent", { postId, replyId: result.rows[0].id });
+  logger.info("Reply sent", { postId, replyId: result.rows[0].id, userId });
 
   // Send notification to poster if enabled (don't fail if this errors)
   try {
@@ -131,7 +131,7 @@ export async function posterReplyToMessage(sessionToken, replyId, message) {
   };
 }
 
-// Get threaded messages for inbox
+// Get threaded messages for inbox (session-based for anonymous posters)
 export async function getInboxMessages(sessionToken) {
   // Find post by session token
   const postResult = await query(
@@ -149,18 +149,18 @@ export async function getInboxMessages(sessionToken) {
   const result = await query(
     `WITH RECURSIVE reply_tree AS (
       -- Get top-level replies (no parent)
-      SELECT 
-        id, message, replier_email, replied_at, is_read, 
+      SELECT
+        id, message, replier_email, replied_at, is_read,
         parent_reply_id, is_from_poster, expires_at,
         ARRAY[id] as path,
         0 as depth
       FROM replies
       WHERE post_id = $1 AND parent_reply_id IS NULL AND expires_at > NOW()
-      
+
       UNION ALL
-      
+
       -- Get nested replies
-      SELECT 
+      SELECT
         r.id, r.message, r.replier_email, r.replied_at, r.is_read,
         r.parent_reply_id, r.is_from_poster, r.expires_at,
         rt.path || r.id,
@@ -172,6 +172,35 @@ export async function getInboxMessages(sessionToken) {
     SELECT * FROM reply_tree
     ORDER BY path`,
     [postId]
+  );
+
+  return result.rows;
+}
+
+// Get all posts with replies for authenticated user's inbox
+export async function getUserInboxPosts(userId) {
+  // Get all posts by this user that have replies
+  const result = await query(
+    `SELECT
+      p.id,
+      p.title,
+      p.location,
+      p.city_key,
+      p.description,
+      p.posted_at,
+      p.expires_at,
+      p.session_token,
+      COUNT(r.id) as reply_count,
+      COUNT(r.id) FILTER (WHERE r.is_read = FALSE) as unread_count
+    FROM posts p
+    LEFT JOIN replies r ON r.post_id = p.id AND r.expires_at > NOW() AND r.is_from_poster = FALSE
+    WHERE p.user_id = $1
+      AND p.is_deleted = FALSE
+      AND p.expires_at > NOW()
+    GROUP BY p.id
+    HAVING COUNT(r.id) > 0
+    ORDER BY MAX(r.replied_at) DESC`,
+    [userId]
   );
 
   return result.rows;

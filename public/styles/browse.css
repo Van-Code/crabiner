@@ -5,8 +5,8 @@
     --accent: #EA5C1F;
     --accent-soft: rgba(234, 92, 31, 0.15);
     --accent-strong: #c54d18;
-    --text-main: #F5F5F5;
-    --text-muted: #D6D7D7;
+    --text-main: #212431;
+    --text-muted: #4F5D75;
     --border-subtle: rgba(214, 215, 215, 0.12);
     --radius-lg: 18px;
     --radius-pill: 999px;
@@ -153,7 +153,7 @@
     cursor: pointer;
     font-size: 1rem;
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-main);
     margin-bottom: 1rem;
     justify-content: space-between;
     align-items: center;
@@ -415,27 +415,42 @@
     color: var(--text-muted);
   }
   
+  /* Date group headers */
+  .date-group-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 20px 0 10px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.03em;
+  }
+
+  .date-group-header:first-child {
+    margin-top: 0;
+  }
+
   .posts-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    gap: 8px;
   }
-  
-  @media (min-width: 960px) {
-    .posts-grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-  }
-  
+
   .post-card {
-    /* background: rgba(10, 4, 20, 0.97); */
-    border-radius: 16px;
-    padding: 11px 12px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .post-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(255, 122, 144, 0.3);
   }
   
   .post-header {
@@ -445,19 +460,38 @@
     gap: 8px;
   }
   
+  .post-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .post-title {
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 580;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
   }
-  
+
   .post-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-wrap: nowrap;
+    gap: 8px;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
+  }
+
+  .post-meta-separator {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .post-category,
+  .post-time {
+    white-space: nowrap;
   }
   
   .post-location {

@@ -1,9 +1,11 @@
 import express from "express";
 import { body, query } from "express-validator";
 import { validateRequest } from "../utils/validation.js";
+import { requireAuth } from "../middleware/auth.js";
 
 import {
   getInboxMessages,
+  getUserInboxPosts,
   markMessageAsRead,
   deleteMessage,
 } from "../services/replyService.js";
@@ -12,7 +14,24 @@ import { posterReplyToMessage } from "../services/replyService.js";
 
 const router = express.Router();
 
-// Get user's inbox (requires session token)
+// Get authenticated user's inbox (all posts with replies)
+router.get("/", requireAuth, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Get all posts with replies
+    const posts = await getUserInboxPosts(userId);
+
+    res.json({
+      posts,
+      totalUnread: posts.reduce((sum, p) => sum + parseInt(p.unread_count), 0),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get user's inbox (requires session token - for anonymous posters)
 router.get("/:sessionToken", async (req, res, next) => {
   try {
     const { sessionToken } = req.params;

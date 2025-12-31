@@ -1,14 +1,16 @@
 import express from "express";
 import { body } from "express-validator";
 import { replyRateLimiter } from "../middleware/rateLimiter.js";
+import { requireAuth } from "../middleware/auth.js";
 import { sendReply } from "../services/replyService.js";
 import { validateRequest } from "../utils/validation.js";
 
 const router = express.Router();
 
-// Send reply to a post
+// Send reply to a post - REQUIRES AUTHENTICATION
 router.post(
   "/:postId",
+  requireAuth, // Must be authenticated to reply
   replyRateLimiter,
   body("message").trim().isLength({ min: 10, max: 1000 }),
   body("contactEmail").isEmail().normalizeEmail(),
@@ -17,8 +19,9 @@ router.post(
     try {
       const { postId } = req.params;
       const { message, contactEmail } = req.body;
+      const userId = req.user.id;
 
-      await sendReply(postId, message, contactEmail);
+      await sendReply(postId, message, contactEmail, userId);
 
       res.json({
         message:

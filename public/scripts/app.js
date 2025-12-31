@@ -9,7 +9,7 @@ let markers = [];
 let allPosts = []; // Store posts for map view
 
 // Global function for mobile city filter
-window.handleCityFilterChange = function(cityKey) {
+window.handleCityFilterChange = function (cityKey) {
   currentCityKey = cityKey;
   currentPage = 1;
   updateURL();
@@ -298,7 +298,7 @@ function createPopupContent(post) {
 function displayPosts(posts) {
   if (posts.length === 0) {
     postsContainer.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+      <div style="text-align: center; padding: 2rem;">
         <p style="color: var(--text-light);">No posts found. Be the first to post a missed connection!</p>
         <a href="/post.html" class="btn-primary" style="margin-top: 1rem;">Post a Connection</a>
       </div>
@@ -306,7 +306,30 @@ function displayPosts(posts) {
     return;
   }
 
-  postsContainer.innerHTML = posts.map((post) => createPostCard(post)).join("");
+  // Group posts by date
+  const grouped = groupPostsByDate(posts);
+
+  // Build HTML with date headers
+  let html = "";
+
+  // Get group headers in chronological order (Today first)
+  const groupOrder = ["Today", "Yesterday"];
+  const otherGroups = Object.keys(grouped).filter(
+    (k) => !groupOrder.includes(k)
+  );
+
+  const orderedGroups = [
+    ...groupOrder.filter((k) => grouped[k]),
+    ...otherGroups,
+  ];
+
+  orderedGroups.forEach((header) => {
+    const groupPosts = grouped[header];
+    html += `<div class="date-group-header">${header}</div>`;
+    html += groupPosts.map((post) => createPostCard(post)).join("");
+  });
+
+  postsContainer.innerHTML = html;
 
   // Add click handlers to posts
   document.querySelectorAll(".post-card").forEach((card) => {
@@ -317,13 +340,23 @@ function displayPosts(posts) {
   });
 }
 
-// Create HTML for a post card
+// Create HTML for a post card (single column, compact)
 function createPostCard(post) {
+  const relativeTime = getRelativeTime(post.posted_at);
+  const cityInfo = getCityByKey(post.city_key);
+  const category = post.category || "General";
+
   return `
     <div class="post-card" data-post-id="${post.id}">
-      <h3 class="post-title">${escapeHtml(post.title)}</h3>
-      <div class="post-location">
-        <span class="location">📍 ${escapeHtml(post.location)}</span>
+      <div class="post-card-content">
+        <h3 class="post-title">${escapeHtml(post.title)}</h3>
+        <div class="post-meta">
+          <span class="post-location">📍 ${escapeHtml(post.location)}</span>
+          <span class="post-meta-separator">•</span>
+          <span class="post-category">${escapeHtml(category)}</span>
+          <span class="post-meta-separator">•</span>
+          <span class="post-time">${relativeTime}</span>
+        </div>
       </div>
     </div>
   `;
@@ -427,7 +460,7 @@ async function loadCityCounts() {
     });
 
     // Also populate mobile city list if function exists
-    if (typeof window.populateMobileCityList === 'function') {
+    if (typeof window.populateMobileCityList === "function") {
       window.populateMobileCityList(citiesWithCounts);
     }
   } catch (error) {

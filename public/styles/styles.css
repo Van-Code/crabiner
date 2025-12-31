@@ -460,12 +460,6 @@ header .container {
   transition: all 0.3s;
 }
 
-.step-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  border-color: var(--primary);
-}
-
 .step-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
@@ -496,12 +490,7 @@ header .container {
   border: 2px solid var(--border);
   transition: all 0.3s;
 }
-
-.feature-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-}
-
+=
 .feature-icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
@@ -827,10 +816,6 @@ header .container {
   border: 2px solid white;
 }
 
-.user-name {
-  color: white;
-  font-weight: 500;
-}
 
 .dropdown {
   position: relative;
@@ -838,7 +823,7 @@ header .container {
 
 .dropdown-toggle {
   background: rgba(255,255,255,0.2);
-  color: white;
+  color: var(--text);
   border: none;
   padding: 0.5rem;
   border-radius: 6px;

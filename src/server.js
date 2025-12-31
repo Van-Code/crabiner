@@ -91,56 +91,6 @@ app.use("/auth", globalRateLimiter);
 // Input sanitization
 app.use(sanitizeInputs);
 
-// Static files
-app.use(express.static(path.join(__dirname, "../public")));
-
-// Auth routes
-app.use("/auth", authRouter);
-
-// API Routes
-app.use("/api/posts", postsRouter);
-app.use("/api/replies", repliesRouter);
-app.use("/api/manage", managementRouter);
-app.use("/api/inbox", inboxRouter);
-app.use("/api/verification", verificationRouter);
-app.use("/api/poster-verification", posterVerificationRouter);
-app.use("/api/moderation", moderationRouter);
-
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
-// User info endpoint
-app.get("/api/user", (req, res) => {
-  if (req.user) {
-    res.json({
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
-      profilePicture: req.user.profile_picture,
-    });
-  } else {
-    res.status(401).json({ error: "Not authenticated" });
-  }
-});
-
-// 404 handler
-app.use((req, res) => {
-  if (req.path.startsWith("/api") || req.path.startsWith("/auth")) {
-    return res.status(404).json({ error: "Not found" });
-  }
-
-  res.status(404).sendFile(path.join(__dirname, "../public/404.html"));
-});
-
-// Error handler
-app.use(errorHandler);
-
 // Initialize
 async function start() {
   try {
@@ -184,7 +134,54 @@ async function start() {
     initPassport();
     console.log("✓ Passport initialized");
 
-    // 4. Initialize email
+    // 4. Register routes (MUST be after session/passport setup)
+    app.use("/auth", authRouter);
+    app.use("/api/posts", postsRouter);
+    app.use("/api/replies", repliesRouter);
+    app.use("/api/manage", managementRouter);
+    app.use("/api/inbox", inboxRouter);
+    app.use("/api/verification", verificationRouter);
+    app.use("/api/poster-verification", posterVerificationRouter);
+    app.use("/api/moderation", moderationRouter);
+
+    // Health check
+    app.get("/api/health", (req, res) => {
+      res.json({
+        status: "ok",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+      });
+    });
+
+    // User info endpoint
+    app.get("/api/user", (req, res) => {
+      if (req.user) {
+        res.json({
+          id: req.user.id,
+          name: req.user.name,
+          email: req.user.email,
+          profilePicture: req.user.profile_picture,
+        });
+      } else {
+        res.status(401).json({ error: "Not authenticated" });
+      }
+    });
+
+    // 404 handler
+    app.use((req, res) => {
+      if (req.path.startsWith("/api") || req.path.startsWith("/auth")) {
+        return res.status(404).json({ error: "Not found" });
+      }
+
+      res.status(404).sendFile(path.join(__dirname, "../public/404.html"));
+    });
+
+    // Error handler
+    app.use(errorHandler);
+
+    console.log("✓ Routes registered");
+
+    // 5. Initialize email
     try {
       initEmail();
       console.log("✓ Email initialized");
@@ -192,10 +189,10 @@ async function start() {
       console.error("✗ Email initialization failed:", error.message);
     }
 
-    // 5. Start cleanup job
+    // 6. Start cleanup job
     startCleanupJob();
 
-    // 6. Start server
+    // 7. Start server
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${config.nodeEnv}`);

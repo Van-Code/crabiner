@@ -2,6 +2,7 @@ import { query } from "../config/database.js";
 import { generateToken, hashToken } from "../utils/crypto.js";
 import logger from "../utils/logger.js";
 import { checkContentSafety } from "./moderationService.js";
+import { nanoid } from "nanoid";
 
 export async function createPost(data) {
   const { location, title, description, expiresInDays, cityKey } = data;
@@ -28,14 +29,20 @@ export async function createPost(data) {
   const managementToken = generateToken();
   const tokenHash = await hashToken(managementToken);
 
+  // Must be UNIQUE
+  const RELAY_EMAIL_DOMAIN =
+    process.env.RELAY_EMAIL_DOMAIN || "relay.crabiner.test";
+
+  const relayEmail = `post_${nanoid(12)}@${RELAY_EMAIL_DOMAIN}`;
   // Generate session token for inbox access
   const sessionToken = generateToken();
+  const contactEmailEncrypted = "enc.owner@email.com";
 
   const result = await query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING id, posted_at, expires_at`,
     [
       location,
@@ -45,6 +52,8 @@ export async function createPost(data) {
       expiresAt,
       tokenHash,
       sessionToken,
+      relayEmail,
+      contactEmailEncrypted,
       cityKey,
     ]
   );
@@ -161,7 +170,7 @@ export async function deletePost(id, token) {
 
 export async function getPostBySessionToken(sessionToken) {
   const result = await query(
-    `SELECT id, location, title, description, posted_at, expires_at
+    `SELECT id, location, title, description, posted_at, expires_at, city_key
      FROM posts
      WHERE session_token = $1 
        AND is_deleted = FALSE 

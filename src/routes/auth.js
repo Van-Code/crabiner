@@ -19,7 +19,7 @@ router.get(
   }),
   (req, res) => {
     // Successful authentication
-    res.redirect("/?auth=success");
+    res.redirect("/inbox?auth=success");
   }
 );
 

@@ -1,12 +1,18 @@
 import express from "express";
 import { body, query } from "express-validator";
 import { postRateLimiter } from "../middleware/rateLimiter.js";
+import { requireAuth } from "../middleware/auth.js";
 import {
   createPost,
   getPosts,
   getPostById,
   searchPosts,
   getPopularSearches,
+  getUserPosts,
+  deleteUserPost,
+  savePost,
+  unsavePost,
+  getSavedPosts,
 } from "../services/postService.js";
 import { query as dbQuery } from "../config/database.js";
 import { sendManagementEmail } from "../services/emailService.js";
@@ -68,6 +74,26 @@ router.get("/popular-searches", async (req, res, next) => {
   }
 });
 
+// Get user's own posts
+router.get("/my-posts", requireAuth, async (req, res, next) => {
+  try {
+    const posts = await getUserPosts(req.user.id);
+    res.json({ posts });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get user's saved posts
+router.get("/saved", requireAuth, async (req, res, next) => {
+  try {
+    const posts = await getSavedPosts(req.user.id);
+    res.json({ posts });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // List posts (paginated)
 router.get(
   "/",
@@ -114,7 +140,7 @@ router.post(
   validateRequest,
   async (req, res, next) => {
     try {
-      const result = await createPost(req.body);
+      const result = await createPost(req.body, req.user?.id);
 
       res.status(201).json({
         id: result.id,
@@ -127,5 +153,41 @@ router.post(
     }
   }
 );
+
+// Save a post
+router.post("/:id/save", requireAuth, async (req, res, next) => {
+  try {
+    await savePost(req.user.id, req.params.id);
+    res.json({ message: "Post saved successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Unsave a post
+router.delete("/:id/save", requireAuth, async (req, res, next) => {
+  try {
+    await unsavePost(req.user.id, req.params.id);
+    res.json({ message: "Post unsaved successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete a post (auth required - only owner can delete)
+router.delete("/:id", requireAuth, async (req, res, next) => {
+  try {
+    await deleteUserPost(req.user.id, req.params.id);
+    res.json({ message: "Post deleted successfully" });
+  } catch (error) {
+    if (error.message === "Unauthorized") {
+      return res.status(403).json({ error: "You can only delete your own posts" });
+    }
+    if (error.message === "Post not found") {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    next(error);
+  }
+});
 
 export default router;

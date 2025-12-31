@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Posts - Crabiner</title>
+    <link rel="stylesheet" href="/styles/styles.css" />
+    <style>
+      .my-posts-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      .my-posts-header {
+        margin-bottom: 2rem;
+      }
+
+      .my-posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .my-post-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        position: relative;
+      }
+
+      .my-post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 0.75rem;
+      }
+
+      .my-post-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .my-post-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .my-post-meta {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.75rem;
+      }
+
+      .my-post-description {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+      }
+
+      .my-post-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-light);
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .auth-required {
+        text-align: center;
+        padding: 3rem 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .loading,
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-light);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="/">
+            <span class="logo-emoji">🦀🔗</span>
+            <span class="logo-text">Crabiner</span>
+          </a>
+        </div>
+
+        <button
+          class="hamburger-menu"
+          id="hamburgerBtn"
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+          <a href="/browse.html" class="nav-link">Browse</a>
+          <a href="/guidelines.html" class="nav-link">Guidelines</a>
+
+          <div id="authSection" class="auth-section">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <main class="my-posts-container">
+      <div id="myPostsContent">
+        <p class="loading">Loading your posts...</p>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>🦀🔗 Crabiner</h4>
+            <p>A safe space for sapphic missed connections</p>
+          </div>
+
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="/browse.html">Browse Posts</a>
+            <a href="/post.html">Post a Connection</a>
+            <a href="/about.html">About</a>
+            <a href="/guidelines.html">Community Guidelines</a>
+          </div>
+
+          <div class="footer-section">
+            <h4>Features</h4>
+            <p>🔒 Privacy-focused</p>
+            <p>🚫 No tracking</p>
+            <p>⏱️ Auto-expiring posts</p>
+            <p>Made with 💕 for the sapphic community</p>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Crabiner. Built for and by queer & nonbinary folks. 🏳️‍🌈
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/scripts/navigation.js"></script>
+    <script src="/scripts/auth.js"></script>
+    <script src="/scripts/my-posts.js"></script>
+  </body>
+</html>

@@ -6,6 +6,13 @@ const router = express.Router();
 // Google OAuth login
 router.get(
   "/google",
+  (req, res, next) => {
+    // Store returnTo in session if provided
+    if (req.query.returnTo) {
+      req.session.returnTo = req.query.returnTo;
+    }
+    next();
+  },
   passport.authenticate("google", {
     scope: ["profile", "email"],
   })
@@ -18,8 +25,13 @@ router.get(
     failureRedirect: "/?auth=failed",
   }),
   (req, res) => {
-    // Successful authentication
-    res.redirect("/?auth=success");
+    // Successful authentication - check for returnTo in session
+    const returnTo = req.session.returnTo || "/";
+    delete req.session.returnTo; // Clear it
+
+    // Add auth=success query param
+    const separator = returnTo.includes("?") ? "&" : "?";
+    res.redirect(`${returnTo}${separator}auth=success`);
   }
 );
 

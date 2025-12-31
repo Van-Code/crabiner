@@ -4,7 +4,7 @@ import logger from "../utils/logger.js";
 import { checkContentSafety } from "./moderationService.js";
 import { nanoid } from "nanoid";
 
-export async function createPost(data) {
+export async function createPost(data, userId = null) {
   const { location, title, description, expiresInDays, cityKey } = data;
 
   // Check content safety BEFORE creating post
@@ -41,8 +41,8 @@ export async function createPost(data) {
   const result = await query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, relay_email, contact_email_encrypted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, city_key, user_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING id, posted_at, expires_at`,
     [
       location,
@@ -55,6 +55,7 @@ export async function createPost(data) {
       relayEmail,
       contactEmailEncrypted,
       cityKey,
+      userId,
     ]
   );
 
@@ -259,6 +260,114 @@ export async function getPopularSearches(limit = 10) {
      ORDER BY count DESC
      LIMIT $1`,
     [limit]
+  );
+
+  return result.rows;
+}
+
+// Get user's own posts
+export async function getUserPosts(userId) {
+  const result = await query(
+    `SELECT
+      p.id,
+      p.location,
+      p.title,
+      p.description,
+      p.posted_at,
+      p.expires_at,
+      p.city_key,
+      p.session_token,
+      COUNT(DISTINCT r.id) FILTER (WHERE r.expires_at > NOW()) as reply_count,
+      COUNT(DISTINCT r.id) FILTER (WHERE r.is_read = FALSE AND r.expires_at > NOW()) as unread_count
+    FROM posts p
+    LEFT JOIN replies r ON r.post_id = p.id AND r.is_from_poster = FALSE
+    WHERE p.user_id = $1
+      AND p.is_deleted = FALSE
+      AND p.expires_at > NOW()
+    GROUP BY p.id
+    ORDER BY p.posted_at DESC`,
+    [userId]
+  );
+
+  return result.rows;
+}
+
+// Delete user's post (only owner can delete)
+export async function deleteUserPost(userId, postId) {
+  const result = await query(
+    `SELECT id FROM posts WHERE id = $1 AND user_id = $2 AND is_deleted = FALSE`,
+    [postId, userId]
+  );
+
+  if (result.rows.length === 0) {
+    // Check if post exists at all
+    const exists = await query(
+      `SELECT id FROM posts WHERE id = $1 AND is_deleted = FALSE`,
+      [postId]
+    );
+
+    if (exists.rows.length === 0) {
+      throw new Error("Post not found");
+    }
+    throw new Error("Unauthorized");
+  }
+
+  await query(`UPDATE posts SET is_deleted = TRUE WHERE id = $1`, [postId]);
+
+  logger.info("Post deleted by user", { postId, userId });
+
+  return { success: true };
+}
+
+// Save a post
+export async function savePost(userId, postId) {
+  try {
+    await query(
+      `INSERT INTO saved_posts (user_id, post_id)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id, post_id) DO NOTHING`,
+      [userId, postId]
+    );
+
+    logger.info("Post saved", { userId, postId });
+    return { success: true };
+  } catch (error) {
+    logger.error("Error saving post:", error);
+    throw error;
+  }
+}
+
+// Unsave a post
+export async function unsavePost(userId, postId) {
+  await query(
+    `DELETE FROM saved_posts
+     WHERE user_id = $1 AND post_id = $2`,
+    [userId, postId]
+  );
+
+  logger.info("Post unsaved", { userId, postId });
+  return { success: true };
+}
+
+// Get user's saved posts
+export async function getSavedPosts(userId) {
+  const result = await query(
+    `SELECT
+      p.id,
+      p.location,
+      p.title,
+      p.description,
+      p.posted_at,
+      p.expires_at,
+      p.city_key,
+      sp.saved_at
+    FROM saved_posts sp
+    JOIN posts p ON p.id = sp.post_id
+    WHERE sp.user_id = $1
+      AND p.is_deleted = FALSE
+      AND p.expires_at > NOW()
+    ORDER BY sp.saved_at DESC`,
+    [userId]
   );
 
   return result.rows;

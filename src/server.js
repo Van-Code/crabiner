@@ -200,7 +200,7 @@ async function start() {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${config.nodeEnv}`);
       logger.info("Crabiner API ready");
-      console.log("\n🦔💕 Crabiner is running!");
+      console.log("\n🦀🔗 Crabiner is running!");
       console.log(`Visit: http://localhost:${PORT}\n`);
     });
   } catch (error) {

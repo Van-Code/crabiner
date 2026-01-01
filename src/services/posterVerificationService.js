@@ -122,7 +122,7 @@ export async function verifyPosterEmail(postId, email, code) {
 }
 
 async function sendPosterVerificationEmail(email, code) {
-  const subject = "Verify Your Email - Missed Connections";
+  const subject = "Verify Your Email - Missed Moments";
 
   const text = `
 Your verification code is: ${code}
@@ -136,7 +136,7 @@ After verifying, we'll send you a link to check your inbox for replies.
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Verify Your Email</h2>
       
-      <p>You posted a missed connection! Let's verify your email so we can send you the inbox link.</p>
+      <p>You posted a missed moment! Let's verify your email so we can send you the inbox link.</p>
       
       <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
         <p style="margin: 0; font-size: 14px; color: #666;">Your verification code:</p>
@@ -160,10 +160,10 @@ After verifying, we'll send you a link to check your inbox for replies.
 async function sendInboxLinkEmail(email, postId, sessionToken, notifyOnReply) {
   const inboxUrl = `${config.security.allowedOrigins[0]}/inbox.html?session=${sessionToken}`;
 
-  const subject = "Your Missed Connection Inbox Link";
+  const subject = "Your Missed Moment Inbox Link";
 
   const text = `
-Your missed connection post is live!
+Your missed moment post is live!
 
 Access your inbox to see replies:
 ${inboxUrl}
@@ -246,10 +246,10 @@ export async function sendReplyNotification(postId) {
 
   const inboxUrl = `${config.security.allowedOrigins[0]}/inbox.html?session=${post.session_token}`;
 
-  const subject = "💌 New Reply to Your Missed Connection";
+  const subject = "💌 New Reply to Your Missed Moment";
 
   const text = `
-You have a new reply to your missed connection post!
+You have a new reply to your missed moment post!
 
 Location: ${post.location}
 
@@ -261,7 +261,7 @@ ${inboxUrl}
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>You Have a New Reply! 💌</h2>
       
-      <p>Someone replied to your missed connection post at <strong>${post.location}</strong>.</p>
+      <p>Someone replied to your missed moment post at <strong>${post.location}</strong>.</p>
       
       <p style="text-align: center; margin: 30px 0;">
         <a href="${inboxUrl}" 

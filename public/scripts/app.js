@@ -299,8 +299,8 @@ function displayPosts(posts) {
   if (posts.length === 0) {
     postsContainer.innerHTML = `
       <div style="text-align: center; padding: 2rem;">
-        <p style="color: var(--text-light);">No posts found. Be the first to post a missed connection!</p>
-        <a href="/post.html" class="btn-primary" style="margin-top: 1rem;">Post a Connection</a>
+        <p style="color: var(--text-light);">No posts found. Be the first to post a missed moment!</p>
+        <a href="/post.html" class="btn-primary" style="margin-top: 1rem;">Post a Moment</a>
       </div>
     `;
     return;

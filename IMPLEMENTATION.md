@@ -5,6 +5,7 @@ This document describes the end-to-end implementation of auth requirements for r
 ## Summary of Changes
 
 ### 1. Auth Requirements for Replies and Inbox
+
 - ✅ Posting moments remains anonymous (no change)
 - ✅ Replying to posts now REQUIRES Google OAuth authentication
 - ✅ Viewing inbox now REQUIRES authentication
@@ -13,12 +14,14 @@ This document describes the end-to-end implementation of auth requirements for r
 - ✅ No reply content leaked in public endpoints
 
 ### 2. Navigation Updates
+
 - ✅ Added "Inbox" menu item (visible when authenticated)
 - ✅ Changed "Logout" to "Sign out" in dropdown menu
 - ✅ Conditional display based on authentication state
 - ✅ Removed redundant auth note from sign-in button
 
 ### 3. Browse Page Layout Improvements
+
 - ✅ Changed from 2-column to 1-column (single card per row)
 - ✅ Posts grouped by date ("Today", "Yesterday", "Mon Dec 29")
 - ✅ Most recent posts first
@@ -71,26 +74,31 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 ### Server-Side Changes
 
 #### 1. Auth Routes (`src/routes/auth.js`)
+
 - Added session-based returnTo support for post-auth redirects
 - Updated Google OAuth callback to redirect to returnTo URL from session
 - Enables "sign in and return to where you were" flow
 
 **Key changes:**
+
 - Store `returnTo` in session before OAuth redirect
 - Redirect to `returnTo` after successful authentication
 - Clear `returnTo` from session after use
 
 #### 2. Reply Routes (`src/routes/replies.js`)
+
 - Added `requireAuth` middleware to POST `/api/replies/:postId`
 - Now passes `user_id` from `req.user.id` to reply service
 - Returns 401 if not authenticated
 
 #### 3. Reply Service (`src/services/replyService.js`)
+
 - Updated `sendReply()` to accept `userId` parameter
 - Stores `user_id` when creating replies
 - Added `getUserInboxPosts()` function to fetch posts with replies for authenticated users
 
 #### 4. Inbox Routes (`src/routes/inbox.js`)
+
 - Added new GET `/api/inbox` endpoint with `requireAuth` middleware
 - Returns all posts with replies for the authenticated user
 - Includes reply counts and unread counts
@@ -99,22 +107,26 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 ### Client-Side Changes
 
 #### 1. Navigation (`public/scripts/auth.js`)
+
 - Added "Inbox" link in authenticated state
 - Changed "Logout" to "Sign out"
 - Removed redundant auth note from unauthenticated state
 
 #### 2. Relative Time Utility (`public/scripts/timeUtils.js`) - NEW FILE
+
 - `getRelativeTime(dateString)` - Returns "Posted 12m ago" style strings
 - `getDateGroupHeader(dateString)` - Returns "Today", "Yesterday", or formatted date
 - `groupPostsByDate(posts)` - Groups posts by date for display
 
 #### 3. Browse Page (`public/scripts/app.js`)
+
 - Updated `displayPosts()` to use date grouping
 - Updated `createPostCard()` for single-column layout with metadata
 - Shows: title (truncated) + location + category + relative time
 - Date group headers inserted between post groups
 
 #### 4. Browse CSS (`public/styles/browse.css`)
+
 - Changed `.posts-grid` to single column layout
 - Added `.date-group-header` styling
 - Updated `.post-card` for compact, single-row display
@@ -122,6 +134,7 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 - Hover effects for better UX
 
 #### 5. View/Reply Page (`public/scripts/view.js`) - COMPLETELY REWRITTEN
+
 - Checks authentication status before showing reply form
 - If not authenticated: shows "Sign in with Google" button with returnTo URL
 - If authenticated: shows reply form with user's email pre-filled
@@ -129,6 +142,7 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 - Direct POST to `/api/replies/:postId` with credentials
 
 #### 6. Inbox Page (`public/inbox.html` and `public/scripts/inbox.js`) - NEW FILES
+
 - New authenticated inbox page at `/inbox.html`
 - Fetches `/api/inbox` to get all posts with replies
 - Shows post titles, locations, reply counts, and unread badges
@@ -140,7 +154,8 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 ### Manual Testing Checklist
 
 **Auth Flow:**
-- [ ] Anonymous users can still post moments without signing in
+
+- [ ] Anonymous users can still Post a Moments without signing in
 - [ ] Trying to reply without auth shows "Sign in required" message
 - [ ] Clicking "Sign in with Google" redirects to Google OAuth
 - [ ] After successful sign-in, user returns to the post page
@@ -148,12 +163,14 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 - [ ] Reply submission includes user_id in database
 
 **Inbox:**
+
 - [ ] Accessing `/inbox.html` without auth shows sign-in prompt
 - [ ] Authenticated users see their posts with replies
 - [ ] Unread counts display correctly
 - [ ] Clicking on inbox items navigates to post detail
 
 **Browse Page:**
+
 - [ ] Posts display in single column
 - [ ] Posts grouped by "Today", "Yesterday", dates
 - [ ] Titles truncate with ellipsis
@@ -163,6 +180,7 @@ env-cmd -f .env.local psql $DATABASE_URL -f db/migrations/001_add_user_id_to_rep
 - [ ] Hover effects work on post cards
 
 **Navigation:**
+
 - [ ] "Inbox" link appears when signed in
 - [ ] "Inbox" link redirects to `/inbox.html`
 - [ ] "Sign out" appears in user dropdown
@@ -199,6 +217,7 @@ npm test tests/auth-replies.test.js
 ## Files Changed/Created
 
 ### New Files
+
 - `db/migrations/001_add_user_id_to_replies.sql` - Database migration
 - `public/scripts/timeUtils.js` - Relative time utilities
 - `public/inbox.html` - Inbox page HTML
@@ -207,6 +226,7 @@ npm test tests/auth-replies.test.js
 - `IMPLEMENTATION.md` - This documentation
 
 ### Modified Files
+
 - `src/routes/auth.js` - Added returnTo session support
 - `src/routes/replies.js` - Added auth middleware
 - `src/routes/inbox.js` - Added authenticated inbox endpoint
@@ -220,6 +240,7 @@ npm test tests/auth-replies.test.js
 ## Behavior Changes
 
 ### Before
+
 1. Anyone could reply to posts anonymously
 2. No inbox for authenticated users
 3. Browse page showed 2-column grid layout
@@ -227,6 +248,7 @@ npm test tests/auth-replies.test.js
 5. Navigation didn't show inbox or consistent sign-out
 
 ### After
+
 1. **Replies require Google OAuth authentication**
 2. **Authenticated users have an inbox** showing all their posts with replies
 3. **Browse page is single-column** with compact, scannable rows
@@ -270,6 +292,7 @@ npm test tests/auth-replies.test.js
 ## Future Enhancements (Not Included)
 
 These were considered but not implemented:
+
 - Email notifications when receiving replies
 - Read/unread status management in authenticated inbox
 - Ability to reply to replies (threading) in authenticated inbox
@@ -279,20 +302,25 @@ These were considered but not implemented:
 ## Support and Troubleshooting
 
 **Issue:** Migration fails with "column already exists"
+
 - **Solution:** The column was likely added manually. Skip that line and run the index creation parts.
 
 **Issue:** 401 errors on reply submission after auth
+
 - **Solution:** Check that cookies are being sent with credentials: 'include' in fetch calls.
 
 **Issue:** Browse page shows no date headers
+
 - **Solution:** Ensure `timeUtils.js` is loaded before `app.js` in `browse.html`.
 
 **Issue:** Inbox shows "Sign in required" even when logged in
+
 - **Solution:** Check that session middleware is properly initialized and cookies are being sent.
 
 ## Conclusion
 
 All requirements have been implemented end-to-end with:
+
 - ✅ Auth enforcement for replies and inbox (server + client)
 - ✅ Navigation updates (Inbox link, Sign out)
 - ✅ Browse page single-column layout with date grouping

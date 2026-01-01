@@ -102,7 +102,7 @@ export async function verifyCode(email, code, postId) {
 }
 
 async function sendVerificationEmail(email, code) {
-  const subject = "Verify your email - Missed Connections";
+  const subject = "Verify your email - Missed Moments";
 
   const text = `
 Your verification code is: ${code}
@@ -116,7 +116,7 @@ If you didn't request this code, you can safely ignore this email.
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Verify Your Email</h2>
       
-      <p>Someone is trying to send a reply to a missed connection post using this email address.</p>
+      <p>Someone is trying to send a reply to a missed moment post using this email address.</p>
       
       <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
         <p style="margin: 0; font-size: 14px; color: #666;">Your verification code:</p>

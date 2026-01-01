@@ -1,6 +1,6 @@
 // Get session token from URL if viewing a specific post's inbox
 const urlParams = new URLSearchParams(window.location.search);
-const sessionToken = urlParams.get('session');
+const sessionToken = urlParams.get("session");
 
 if (sessionToken) {
   // Load individual post inbox (existing behavior for session tokens)
@@ -12,7 +12,7 @@ if (sessionToken) {
 
 // Load authenticated user's inbox list (all posts with replies)
 async function loadInboxList() {
-  const messages = document.getElementById('messages');
+  const messages = document.getElementById("messages");
 
   try {
     // Check if user is authenticated
@@ -46,14 +46,14 @@ async function loadInboxList() {
     messages.innerHTML = `
       <div class="error-message">
         <p>Failed to load inbox. Please try again later.</p>
-        <a href="/browse.html" class="btn-secondary">Browse Posts</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments</a>
       </div>
     `;
   }
 }
 
 function showAuthRequired() {
-  const messages = document.getElementById('messages');
+  const messages = document.getElementById("messages");
   messages.innerHTML = `
     <div class="auth-required" style="text-align: center; padding: 3rem 1rem;">
       <h2>🔐 Sign in required</h2>
@@ -68,33 +68,33 @@ function showAuthRequired() {
         Sign in with Google
       </a>
       <p style="margin-top: 1rem;">
-        <a href="/browse.html" class="btn-secondary">Browse Posts Instead</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments Instead</a>
       </p>
     </div>
   `;
 
   // Hide other sections
-  document.getElementById('postInfo').style.display = 'none';
-  document.querySelector('.inbox-header').style.display = 'none';
+  document.getElementById("postInfo").style.display = "none";
+  document.querySelector(".inbox-header").style.display = "none";
 }
 
 function displayInboxList(data) {
-  const messages = document.getElementById('messages');
-  const postInfo = document.getElementById('postInfo');
-  const inboxHeader = document.querySelector('.inbox-header');
+  const messages = document.getElementById("messages");
+  const postInfo = document.getElementById("postInfo");
+  const inboxHeader = document.querySelector(".inbox-header");
 
   // Hide individual post info
-  postInfo.style.display = 'none';
+  postInfo.style.display = "none";
 
   if (!data.posts || data.posts.length === 0) {
-    inboxHeader.querySelector('h2').textContent = 'Inbox';
-    inboxHeader.querySelector('#unreadBadge').style.display = 'none';
+    inboxHeader.querySelector("h2").textContent = "Inbox";
+    inboxHeader.querySelector("#unreadBadge").style.display = "none";
 
     messages.innerHTML = `
       <div class="empty-state" style="text-align: center; padding: 3rem 1rem;">
         <h3>📭 Your inbox is empty</h3>
         <p>When you receive replies to your posts, they'll appear here.</p>
-        <a href="/browse.html" class="btn-primary" style="margin-top: 1rem;">Browse Posts</a>
+        <a href="/browse.html" class="btn-primary" style="margin-top: 1rem;">Browse Moments</a>
       </div>
     `;
     return;
@@ -103,20 +103,22 @@ function displayInboxList(data) {
   const totalUnread = data.totalUnread || 0;
 
   // Update header
-  inboxHeader.querySelector('h2').textContent = 'Inbox';
-  const unreadBadge = inboxHeader.querySelector('#unreadBadge');
+  inboxHeader.querySelector("h2").textContent = "Inbox";
+  const unreadBadge = inboxHeader.querySelector("#unreadBadge");
   if (totalUnread > 0) {
     unreadBadge.textContent = `${totalUnread} unread`;
-    unreadBadge.style.display = 'inline-block';
+    unreadBadge.style.display = "inline-block";
   } else {
-    unreadBadge.style.display = 'none';
+    unreadBadge.style.display = "none";
   }
 
   // Display posts list
   messages.innerHTML = `
     <div class="inbox-list-container">
       <p class="inbox-stats" style="color: var(--text-light); margin-bottom: 1rem;">
-        ${data.posts.length} post${data.posts.length === 1 ? "" : "s"} with replies
+        ${data.posts.length} post${
+    data.posts.length === 1 ? "" : "s"
+  } with replies
       </p>
       ${data.posts.map((post) => createInboxListItem(post)).join("")}
     </div>
@@ -136,16 +138,26 @@ function createInboxListItem(post) {
   const unreadCount = parseInt(post.unread_count) || 0;
 
   return `
-    <div class="inbox-list-item" data-session-token="${escapeHtml(post.session_token)}" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
+    <div class="inbox-list-item" data-session-token="${escapeHtml(
+      post.session_token
+    )}" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
         <h3 style="margin: 0; font-size: 1.1rem;">${escapeHtml(post.title)}</h3>
-        ${unreadCount > 0 ? `<span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">${unreadCount} new</span>` : ""}
+        ${
+          unreadCount > 0
+            ? `<span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">${unreadCount} new</span>`
+            : ""
+        }
       </div>
       <div style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.75rem;">
-        📍 ${escapeHtml(post.location)} • ${replyCount} ${replyCount === 1 ? "reply" : "replies"}
+        📍 ${escapeHtml(post.location)} • ${replyCount} ${
+    replyCount === 1 ? "reply" : "replies"
+  }
       </div>
       <div style="font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        ${escapeHtml(post.description).substring(0, 120)}${post.description.length > 120 ? "..." : ""}
+        ${escapeHtml(post.description).substring(0, 120)}${
+    post.description.length > 120 ? "..." : ""
+  }
       </div>
     </div>
   `;
@@ -179,7 +191,7 @@ async function loadPostInbox(sessionToken) {
 function displayPostInbox(data) {
   // Display post info
   const postInfo = document.getElementById("postInfo");
-  postInfo.style.display = 'block';
+  postInfo.style.display = "block";
   postInfo.innerHTML = `
     <h1 class="post-title">${escapeHtml(data.post.description)}</h1>
     <div class="post-meta">
@@ -253,11 +265,14 @@ if (posterReplyForm) {
     const message = document.getElementById("posterReplyMessage").value;
 
     try {
-      const response = await fetch(`/api/inbox/${sessionToken}/messages/${replyId}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
+      const response = await fetch(
+        `/api/inbox/${sessionToken}/messages/${replyId}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send reply");
@@ -284,7 +299,8 @@ if (cancelBtn) {
 const posterReplyMessage = document.getElementById("posterReplyMessage");
 if (posterReplyMessage) {
   posterReplyMessage.addEventListener("input", () => {
-    document.getElementById("posterReplyCount").textContent = posterReplyMessage.value.length;
+    document.getElementById("posterReplyCount").textContent =
+      posterReplyMessage.value.length;
   });
 }
 

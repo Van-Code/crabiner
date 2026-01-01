@@ -25,8 +25,8 @@ async function testEmail() {
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: "your-test-email@example.com", // Change this to your email
-      subject: "Test Email from Missed Connections",
-      text: "This is a test email from your Missed Connections app!",
+      subject: "Test Email from Missed Moments",
+      text: "This is a test email from your Missed Moments app!",
       html: "<h1>Test Email</h1><p>If you received this, AWS SES is working! 🎉</p>",
     });
 

@@ -5,8 +5,16 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "env-cmd -f .env.local node src/server.js",
+    "dev:test": "DISABLE_RATE_LIMIT=true env-cmd -f .env.local node src/server.js",
     "db:seed:local": "env-cmd -f .env.local node seed_posts.js",
-    "cleanup": "node src/services/cleanupService.js"
+    "cleanup": "node src/services/cleanupService.js",
+    "test": "DISABLE_RATE_LIMIT=true node --test tests/**/*.test.js",
+    "test:auth": "DISABLE_RATE_LIMIT=true node --test tests/auth-flow.test.js",
+    "test:posts": "DISABLE_RATE_LIMIT=true node --test tests/post-lifecycle.test.js",
+    "test:conversations": "DISABLE_RATE_LIMIT=true node --test tests/conversations.test.js",
+    "test:inbox": "DISABLE_RATE_LIMIT=true node --test tests/inbox-notifications.test.js",
+    "test:ui": "DISABLE_RATE_LIMIT=true node --test tests/ui-validation.test.js",
+    "test:legacy": "DISABLE_RATE_LIMIT=true node tests/posts.test.js && DISABLE_RATE_LIMIT=true node --test tests/auth-replies.test.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

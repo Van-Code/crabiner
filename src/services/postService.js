@@ -124,6 +124,7 @@ export async function getPosts({
     posts: result.rows,
     page,
     hasMore: result.rows.length === limit,
+    totalPages: result.rows.length / 20,
   };
 }
 

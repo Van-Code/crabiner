@@ -36,12 +36,13 @@ async function testCityCountsNonZero() {
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
   const tokenHash = await bcrypt.hash(nanoid(32), 10);
   const sessionToken = nanoid(32);
+  const relayEmail = `test@relay.${nanoid(4)}.abc`;
 
   const result = await client.query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, is_deleted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, $10)
      RETURNING id`,
     [
       "San Francisco, CA",
@@ -51,6 +52,8 @@ async function testCityCountsNonZero() {
       expiresAt,
       tokenHash,
       sessionToken,
+      relayEmail,
+      "test@encrypted.abc",
       "sf",
     ]
   );
@@ -89,21 +92,24 @@ async function testExpiredPostsExcluded() {
   const expiredDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
   const tokenHash = await bcrypt.hash(nanoid(32), 10);
   const sessionToken = nanoid(32);
+  const relayEmail = `test@relay.${nanoid(4)}.abc`;
 
   const result = await client.query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, is_deleted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, $10)
      RETURNING id`,
     [
       "Oakland, CA",
       "Expired Test Post",
       "This is an expired test post",
-      expiredDate,
+      now,
       expiredDate,
       tokenHash,
       sessionToken,
+      relayEmail,
+      "test@encrypted.abc",
       "oakland",
     ]
   );
@@ -152,12 +158,13 @@ async function testDeletedPostsExcluded() {
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const tokenHash = await bcrypt.hash(nanoid(32), 10);
   const sessionToken = nanoid(32);
+  const relayEmail = `test@relay.${nanoid(4)}.abc`;
 
   const result = await client.query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, is_deleted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, TRUE, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, TRUE, $10)
      RETURNING id`,
     [
       "Berkeley, CA",
@@ -167,6 +174,8 @@ async function testDeletedPostsExcluded() {
       expiresAt,
       tokenHash,
       sessionToken,
+      relayEmail,
+      "test@encrypted.abc",
       "berkeley",
     ]
   );
@@ -214,12 +223,14 @@ async function testBrowseFilterByCityKey() {
   const tokenHash2 = await bcrypt.hash(nanoid(32), 10);
   const sessionToken1 = nanoid(32);
   const sessionToken2 = nanoid(32);
+  const relayEmail1 = `test@relay.${nanoid(4)}.abc`;
+  const relayEmail2 = `test@relay.${nanoid(4)}.abc`;
 
   const sfPost = await client.query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, is_deleted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, $10)
      RETURNING id`,
     [
       "San Francisco, CA",
@@ -229,6 +240,8 @@ async function testBrowseFilterByCityKey() {
       expiresAt,
       tokenHash1,
       sessionToken1,
+      relayEmail1,
+      "test@encrypted.abc",
       "sf",
     ]
   );
@@ -236,8 +249,8 @@ async function testBrowseFilterByCityKey() {
   const oaklandPost = await client.query(
     `INSERT INTO posts
      (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, is_deleted, city_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, $9)
+      management_token_hash, session_token, relay_email, contact_email_encrypted, is_deleted, city_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, $10)
      RETURNING id`,
     [
       "Oakland, CA",
@@ -247,6 +260,8 @@ async function testBrowseFilterByCityKey() {
       expiresAt,
       tokenHash2,
       sessionToken2,
+      relayEmail2,
+      "test@encrypted.abc",
       "oakland",
     ]
   );

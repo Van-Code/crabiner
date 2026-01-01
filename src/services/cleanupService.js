@@ -3,6 +3,7 @@ import { query } from "../config/database.js";
 import { config } from "../config/env.js";
 import logger from "../utils/logger.js";
 import { cleanupExpiredCodes } from "./verificationService.js";
+import { cleanupExpiredTokens } from "../utils/tokens.js";
 
 export function startCleanupJob() {
   logger.info("Starting cleanup job", { schedule: config.cleanup.cron });
@@ -21,7 +22,7 @@ async function cleanupExpiredPosts() {
 
   // Clean up posts
   const result = await query(
-    `DELETE FROM posts 
+    `DELETE FROM posts
      WHERE expires_at < $1 OR is_deleted = TRUE
      RETURNING id`,
     [now]
@@ -33,6 +34,9 @@ async function cleanupExpiredPosts() {
 
   // Clean up verification codes
   await cleanupExpiredCodes();
+
+  // Clean up expired refresh tokens
+  await cleanupExpiredTokens();
 }
 // Manual cleanup (can be run via npm run cleanup)
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -40,3 +40,11 @@ export async function query(text, params) {
     throw error;
   }
 }
+
+export async function closeDatabase() {
+  if (pool) {
+    await pool.end();
+    logger.info("Database connection pool closed");
+    pool = null;
+  }
+}

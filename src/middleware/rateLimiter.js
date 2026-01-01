@@ -1,6 +1,10 @@
 import rateLimit from "express-rate-limit";
 import { config } from "../config/env.js";
 
+// Skip rate limiting in test mode
+const skipRateLimit =
+  process.env.NODE_ENV === "test" || process.env.DISABLE_RATE_LIMIT === "true";
+console.log("ratelimiter", skipRateLimit);
 // Global rate limiter (all requests)
 export const globalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -8,6 +12,7 @@ export const globalRateLimiter = rateLimit({
   message: { error: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => skipRateLimit,
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many requests",
@@ -26,6 +31,7 @@ export const postRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
+  skip: () => skipRateLimit,
   handler: (req, res) => {
     res.status(429).json({
       error: "Daily post limit reached",
@@ -43,6 +49,7 @@ export const replyRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => skipRateLimit,
   handler: (req, res) => {
     res.status(429).json({
       error: "Daily reply limit reached",

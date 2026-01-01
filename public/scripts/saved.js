@@ -1,6 +1,6 @@
 // Load user's saved posts
 async function loadSavedPosts() {
-  const content = document.getElementById('savedContent');
+  const content = document.getElementById("savedContent");
 
   try {
     // Check authentication
@@ -34,14 +34,14 @@ async function loadSavedPosts() {
     content.innerHTML = `
       <div class="error-message">
         <p>Failed to load saved posts. Please try again later.</p>
-        <a href="/browse.html" class="btn-secondary">Browse Posts</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments</a>
       </div>
     `;
   }
 }
 
 function showAuthRequired() {
-  const content = document.getElementById('savedContent');
+  const content = document.getElementById("savedContent");
   content.innerHTML = `
     <div class="auth-required">
       <h2>🔐 Sign in required</h2>
@@ -56,14 +56,14 @@ function showAuthRequired() {
         Sign in with Google
       </a>
       <p style="margin-top: 1rem;">
-        <a href="/browse.html" class="btn-secondary">Browse Posts Instead</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments Instead</a>
       </p>
     </div>
   `;
 }
 
 function displaySavedPosts(posts) {
-  const content = document.getElementById('savedContent');
+  const content = document.getElementById("savedContent");
 
   if (!posts || posts.length === 0) {
     content.innerHTML = `
@@ -73,7 +73,7 @@ function displaySavedPosts(posts) {
       <div class="empty-state">
         <h3>📭 No saved posts yet</h3>
         <p>When you save posts, they'll appear here for easy access later.</p>
-        <a href="/browse.html" class="btn-primary" style="margin-top: 1rem;">Browse Posts</a>
+        <a href="/browse.html" class="btn-primary" style="margin-top: 1rem;">Browse Moments</a>
       </div>
     `;
     return;
@@ -82,18 +82,23 @@ function displaySavedPosts(posts) {
   content.innerHTML = `
     <div class="saved-header">
       <h1>💾 Saved Posts</h1>
-      <p style="color: var(--text-light);">${posts.length} saved post${posts.length === 1 ? "" : "s"}</p>
+      <p style="color: var(--text-light);">${posts.length} saved post${
+    posts.length === 1 ? "" : "s"
+  }</p>
     </div>
     <div class="saved-list">
-      ${posts.map(post => createSavedCard(post)).join('')}
+      ${posts.map((post) => createSavedCard(post)).join("")}
     </div>
   `;
 
   // Add event listeners
-  document.querySelectorAll('.saved-card').forEach(card => {
-    card.addEventListener('click', (e) => {
+  document.querySelectorAll(".saved-card").forEach((card) => {
+    card.addEventListener("click", (e) => {
       // Don't navigate if clicking the unsave button
-      if (e.target.classList.contains('unsave-btn') || e.target.closest('.unsave-btn')) {
+      if (
+        e.target.classList.contains("unsave-btn") ||
+        e.target.closest(".unsave-btn")
+      ) {
         return;
       }
       const postId = card.dataset.postId;
@@ -101,8 +106,8 @@ function displaySavedPosts(posts) {
     });
   });
 
-  document.querySelectorAll('.unsave-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+  document.querySelectorAll(".unsave-btn").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const postId = btn.dataset.postId;
       await unsavePost(postId);
@@ -117,7 +122,9 @@ function createSavedCard(post) {
     <div class="saved-card" data-post-id="${post.id}">
       <div class="saved-header-row">
         <h3 class="saved-title">${escapeHtml(post.title)}</h3>
-        <button class="unsave-btn" data-post-id="${post.id}" title="Remove from saved">
+        <button class="unsave-btn" data-post-id="${
+          post.id
+        }" title="Remove from saved">
           ❌
         </button>
       </div>
@@ -125,7 +132,9 @@ function createSavedCard(post) {
         📍 ${escapeHtml(post.location)} • Saved ${savedDate}
       </div>
       <div class="saved-description">
-        ${escapeHtml(post.description).substring(0, 200)}${post.description.length > 200 ? "..." : ""}
+        ${escapeHtml(post.description).substring(0, 200)}${
+    post.description.length > 200 ? "..." : ""
+  }
       </div>
     </div>
   `;
@@ -134,19 +143,19 @@ function createSavedCard(post) {
 async function unsavePost(postId) {
   try {
     const response = await fetch(`/api/posts/${postId}/save`, {
-      method: 'DELETE',
-      credentials: 'include',
+      method: "DELETE",
+      credentials: "include",
     });
 
     if (!response.ok) {
-      throw new Error('Failed to unsave post');
+      throw new Error("Failed to unsave post");
     }
 
     // Reload the page to show updated list
     location.reload();
   } catch (error) {
-    console.error('Unsave error:', error);
-    alert('Failed to unsave post. Please try again.');
+    console.error("Unsave error:", error);
+    alert("Failed to unsave post. Please try again.");
   }
 }
 

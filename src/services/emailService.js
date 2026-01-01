@@ -5,10 +5,10 @@ import logger from "../utils/logger.js";
 export async function sendReplyEmail({ to, postId, message, replierEmail }) {
   const transporter = getTransporter();
 
-  const subject = "You have a reply to your Missed Connection";
+  const subject = "You have a reply to your Missed Moment";
 
   const text = `
-You received a reply to your missed connection post!
+You received a reply to your missed moment post!
 
 Message:
 ${message}
@@ -24,7 +24,7 @@ This is an automated message. Your privacy is protected - the sender used our re
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>You have a reply! 💌</h2>
-      <p>Someone replied to your missed connection post.</p>
+      <p>Someone replied to your missed moment post.</p>
       
       <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(message)}</p>
@@ -66,10 +66,10 @@ export async function sendManagementEmail({
 
   const managementUrl = `${config.security.allowedOrigins[0]}/manage.html?id=${postId}&token=${managementToken}`;
 
-  const subject = "Your Missed Connection Post - Management Link";
+  const subject = "Your Missed Moment Post - Management Link";
 
   const text = `
-Your missed connection post has been created!
+Your missed moment post has been created!
 
 IMPORTANT: Save this email! This is your only way to delete your post early.
 

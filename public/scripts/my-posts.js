@@ -1,6 +1,6 @@
 // Load user's posts
 async function loadMyPosts() {
-  const content = document.getElementById('myPostsContent');
+  const content = document.getElementById("myPostsContent");
 
   try {
     // Check authentication
@@ -34,14 +34,14 @@ async function loadMyPosts() {
     content.innerHTML = `
       <div class="error-message">
         <p>Failed to load your posts. Please try again later.</p>
-        <a href="/browse.html" class="btn-secondary">Browse Posts</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments</a>
       </div>
     `;
   }
 }
 
 function showAuthRequired() {
-  const content = document.getElementById('myPostsContent');
+  const content = document.getElementById("myPostsContent");
   content.innerHTML = `
     <div class="auth-required">
       <h2>🔐 Sign in required</h2>
@@ -56,14 +56,14 @@ function showAuthRequired() {
         Sign in with Google
       </a>
       <p style="margin-top: 1rem;">
-        <a href="/browse.html" class="btn-secondary">Browse Posts Instead</a>
+        <a href="/browse.html" class="btn-secondary">Browse Moments Instead</a>
       </p>
     </div>
   `;
 }
 
 function displayMyPosts(posts) {
-  const content = document.getElementById('myPostsContent');
+  const content = document.getElementById("myPostsContent");
 
   if (!posts || posts.length === 0) {
     content.innerHTML = `
@@ -72,8 +72,8 @@ function displayMyPosts(posts) {
       </div>
       <div class="empty-state">
         <h3>📭 You haven't posted anything yet</h3>
-        <p>Your missed connection posts will appear here.</p>
-        <a href="/post.html" class="btn-primary" style="margin-top: 1rem;">Post a Connection</a>
+        <p>Your missed moment posts will appear here.</p>
+        <a href="/post.html" class="btn-primary" style="margin-top: 1rem;">Post a Moment</a>
       </div>
     `;
     return;
@@ -82,16 +82,18 @@ function displayMyPosts(posts) {
   content.innerHTML = `
     <div class="my-posts-header">
       <h1>My Posts</h1>
-      <p style="color: var(--text-light);">${posts.length} post${posts.length === 1 ? "" : "s"}</p>
+      <p style="color: var(--text-light);">${posts.length} post${
+    posts.length === 1 ? "" : "s"
+  }</p>
     </div>
     <div class="my-posts-list">
-      ${posts.map(post => createPostCard(post)).join('')}
+      ${posts.map((post) => createPostCard(post)).join("")}
     </div>
   `;
 
   // Add event listeners for delete buttons
-  document.querySelectorAll('.delete-post-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.querySelectorAll(".delete-post-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const postId = btn.dataset.postId;
       confirmDelete(postId);
@@ -99,8 +101,8 @@ function displayMyPosts(posts) {
   });
 
   // Add event listeners for view buttons
-  document.querySelectorAll('.view-post-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.querySelectorAll(".view-post-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const postId = btn.dataset.postId;
       window.location.href = `/view.html?id=${postId}`;
@@ -108,8 +110,8 @@ function displayMyPosts(posts) {
   });
 
   // Add event listeners for inbox buttons
-  document.querySelectorAll('.inbox-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.querySelectorAll(".inbox-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const sessionToken = btn.dataset.sessionToken;
       window.location.href = `/inbox.html?session=${sessionToken}`;
@@ -128,27 +130,47 @@ function createPostCard(post) {
       <div class="my-post-header">
         <h3 class="my-post-title">${escapeHtml(post.title)}</h3>
         <div class="my-post-actions">
-          <button class="btn-secondary view-post-btn" data-post-id="${post.id}">View</button>
-          ${replyCount > 0 ? `<button class="btn-primary inbox-btn" data-session-token="${post.session_token}">Inbox ${unreadCount > 0 ? `(${unreadCount})` : ''}</button>` : ''}
-          <button class="btn-danger delete-post-btn" data-post-id="${post.id}">Delete</button>
+          <button class="btn-secondary view-post-btn" data-post-id="${
+            post.id
+          }">View</button>
+          ${
+            replyCount > 0
+              ? `<button class="btn-primary inbox-btn" data-session-token="${
+                  post.session_token
+                }">Inbox ${unreadCount > 0 ? `(${unreadCount})` : ""}</button>`
+              : ""
+          }
+          <button class="btn-danger delete-post-btn" data-post-id="${
+            post.id
+          }">Delete</button>
         </div>
       </div>
       <div class="my-post-meta">
-        📍 ${escapeHtml(post.location)} • Posted ${postedDate} • Expires ${expiresDate}
+        📍 ${escapeHtml(
+          post.location
+        )} • Posted ${postedDate} • Expires ${expiresDate}
       </div>
       <div class="my-post-description">
         ${escapeHtml(post.description)}
       </div>
       <div class="my-post-stats">
-        <span>${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</span>
-        ${unreadCount > 0 ? `<span style="color: var(--primary-color); font-weight: 600;">${unreadCount} unread</span>` : ''}
+        <span>${replyCount} ${replyCount === 1 ? "reply" : "replies"}</span>
+        ${
+          unreadCount > 0
+            ? `<span style="color: var(--primary-color); font-weight: 600;">${unreadCount} unread</span>`
+            : ""
+        }
       </div>
     </div>
   `;
 }
 
 function confirmDelete(postId) {
-  if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+  if (
+    !confirm(
+      "Are you sure you want to delete this post? This action cannot be undone."
+    )
+  ) {
     return;
   }
 
@@ -158,19 +180,19 @@ function confirmDelete(postId) {
 async function deletePost(postId) {
   try {
     const response = await fetch(`/api/posts/${postId}`, {
-      method: 'DELETE',
-      credentials: 'include',
+      method: "DELETE",
+      credentials: "include",
     });
 
     if (!response.ok) {
-      throw new Error('Failed to delete post');
+      throw new Error("Failed to delete post");
     }
 
     // Reload the page to show updated list
     location.reload();
   } catch (error) {
-    console.error('Delete error:', error);
-    alert('Failed to delete post. Please try again.');
+    console.error("Delete error:", error);
+    alert("Failed to delete post. Please try again.");
   }
 }
 

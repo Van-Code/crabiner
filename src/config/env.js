@@ -50,8 +50,8 @@ export const config = {
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackUrl: process.env.GOOGLE_CALLBACK_URL,
   },
-  session: {
-    secret: process.env.SESSION_SECRET,
+  jwt: {
+    secret: process.env.JWT_SECRET,
   },
   security: {
     encryptionKey: process.env.ENCRYPTION_KEY,
@@ -66,17 +66,26 @@ export const config = {
   },
 };
 
-// Validate Google OAuth vars
+// Validate Google OAuth and JWT vars
 if (process.env.NODE_ENV === "production") {
-  const googleRequired = [
+  const authRequired = [
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_CALLBACK_URL",
-    "SESSION_SECRET",
+    "JWT_SECRET",
   ];
-  for (const envVar of googleRequired) {
+  for (const envVar of authRequired) {
     if (!process.env[envVar]) {
-      console.warn(`Warning: ${envVar} not set. Google OAuth will not work.`);
+      console.warn(`Warning: ${envVar} not set. Authentication will not work.`);
     }
   }
+}
+
+// Warn if JWT_SECRET is not set or too short
+if (!process.env.JWT_SECRET) {
+  console.warn("Warning: JWT_SECRET not set. Using SESSION_SECRET as fallback.");
+} else if (process.env.JWT_SECRET.length < 32) {
+  console.warn(
+    `Warning: JWT_SECRET should be at least 32 characters. Current length: ${process.env.JWT_SECRET.length}`
+  );
 }

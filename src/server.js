@@ -1,15 +1,14 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
 import passport from "passport";
 
 // Config
 import "./config/env.js";
-import { initDatabase, getPool } from "./config/database.js";
+import { initDatabase } from "./config/database.js";
 import { initEmail } from "./config/email.js";
 import { initPassport } from "./config/passport.js";
 
@@ -72,7 +71,7 @@ app.use(
     origin: config.security.allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 // Static files first, always before rate limits and auth
@@ -82,8 +81,8 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: false, limit: "10kb" }));
 
-// NOTE: Session and passport are initialized AFTER database connection
-// See start() function below
+// Cookie parsing (for refresh tokens)
+app.use(cookieParser());
 
 // Global rate limiting only for API routes
 app.use("/api", globalRateLimiter);
@@ -98,43 +97,12 @@ async function start() {
     await initDatabase();
     console.log("✓ Database initialized");
 
-    // 2. Initialize session store (requires database pool)
-    const PgSession = connectPgSimple(session);
-
-    app.use(
-      session({
-        store: new PgSession({
-          pool: getPool(),
-          tableName: "session",
-        }),
-        secret: config.session.secret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-          httpOnly: true,
-          secure: config.nodeEnv === "production",
-          sameSite: "lax",
-        },
-      })
-    );
-
-    console.log("✓ Session store initialized");
-
-    // 3. Initialize passport (requires session)
+    // 2. Initialize passport (stateless mode - no sessions)
     app.use(passport.initialize());
-    app.use(passport.session());
-
-    // Make user available to all routes
-    app.use((req, res, next) => {
-      res.locals.user = req.user;
-      next();
-    });
-
     initPassport();
-    console.log("✓ Passport initialized");
+    console.log("✓ Passport initialized (stateless)");
 
-    // 4. Register routes (MUST be after session/passport setup)
+    // 3. Register routes
     app.use("/auth", authRouter);
     app.use("/api/posts", postsRouter);
     app.use("/api/replies", repliesRouter);
@@ -153,18 +121,20 @@ async function start() {
       });
     });
 
-    // User info endpoint
-    app.get("/api/user", (req, res) => {
-      if (req.user) {
-        res.json({
-          id: req.user.id,
-          name: req.user.name,
-          email: req.user.email,
-          profilePicture: req.user.profile_picture,
-        });
-      } else {
-        res.status(401).json({ error: "Not authenticated" });
-      }
+    // User info endpoint - requires JWT auth
+    // Import requireAuth middleware
+    const { requireAuth } = await import("./middleware/auth.js");
+
+    app.get("/api/user", requireAuth, (req, res) => {
+      res.json({
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        emailVerified: req.user.emailVerified,
+        avatarUrl: req.user.avatarUrl,
+        // Legacy field for compatibility
+        profilePicture: req.user.avatarUrl,
+      });
     });
 
     // 404 handler
@@ -181,7 +151,7 @@ async function start() {
 
     console.log("✓ Routes registered");
 
-    // 5. Initialize email
+    // 4. Initialize email
     try {
       initEmail();
       console.log("✓ Email initialized");
@@ -189,10 +159,10 @@ async function start() {
       console.error("✗ Email initialization failed:", error.message);
     }
 
-    // 6. Start cleanup job
+    // 5. Start cleanup job
     startCleanupJob();
 
-    // 7. Start server
+    // 6. Start server
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${config.nodeEnv}`);

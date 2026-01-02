@@ -16,8 +16,6 @@ const REFRESH_TOKEN_TTL_DAYS = 30; // 30 days
 export function generateAccessToken(user) {
   const payload = {
     userId: user.id,
-    email: user.email,
-    name: user.name,
   };
 
   return jwt.sign(payload, getJwtSecret(), {
@@ -84,7 +82,13 @@ export async function storeRefreshToken(userId, token, options = {}) {
     `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, user_agent, ip)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING id, user_id, created_at, expires_at`,
-    [userId, tokenHash, expiresAt, options.userAgent || null, options.ip || null]
+    [
+      userId,
+      tokenHash,
+      expiresAt,
+      options.userAgent || null,
+      options.ip || null,
+    ]
   );
 
   return result.rows[0];
@@ -239,7 +243,9 @@ export async function cleanupExpiredTokens() {
   );
 
   if (result.rowCount > 0) {
-    logger.info("Expired refresh tokens cleaned up", { count: result.rowCount });
+    logger.info("Expired refresh tokens cleaned up", {
+      count: result.rowCount,
+    });
   }
 
   return result.rowCount;
@@ -250,19 +256,14 @@ export async function cleanupExpiredTokens() {
  * @returns {string} JWT secret
  */
 function getJwtSecret() {
-  const secret = process.env.JWT_SECRET || config.session?.secret;
+  const secret = process.env.JWT_SECRET;
 
   if (!secret) {
-    throw new Error(
-      "JWT_SECRET environment variable is not set. This is required for token authentication."
-    );
+    throw new Error("JWT_SECRET must be set");
   }
 
   if (secret.length < 32) {
-    logger.warn(
-      "JWT_SECRET should be at least 32 characters for security. Current length:",
-      secret.length
-    );
+    logger.warn("JWT_SECRET should be at least 32 characters");
   }
 
   return secret;

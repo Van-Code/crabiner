@@ -1,36 +1,29 @@
+import { apiJson, apiFetch } from "./apiClient.js";
+import { isAuthenticated } from "./authState.js";
+
 // Load user's saved posts
 async function loadSavedPosts() {
   const content = document.getElementById("savedContent");
 
   try {
     // Check authentication
-    const authResponse = await fetch("/auth/status", {
-      credentials: "include",
-    });
-    const authData = await authResponse.json();
-
-    if (!authData.authenticated) {
+    if (!isAuthenticated()) {
       showAuthRequired();
       return;
     }
 
-    // Fetch saved posts
-    const response = await fetch("/api/posts/saved", {
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        showAuthRequired();
-        return;
-      }
-      throw new Error("Failed to load saved posts");
-    }
-
-    const data = await response.json();
+    // Fetch saved posts using API client
+    const data = await apiJson("/api/posts/saved");
     displaySavedPosts(data.posts);
   } catch (error) {
     console.error("Error loading saved posts:", error);
+
+    // Check if auth failed
+    if (!isAuthenticated()) {
+      showAuthRequired();
+      return;
+    }
+
     content.innerHTML = `
       <div class="error-message">
         <p>Failed to load saved posts. Please try again later.</p>
@@ -142,14 +135,9 @@ function createSavedCard(post) {
 
 async function unsavePost(postId) {
   try {
-    const response = await fetch(`/api/posts/${postId}/save`, {
+    await apiFetch(`/api/posts/${postId}/save`, {
       method: "DELETE",
-      credentials: "include",
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to unsave post");
-    }
 
     // Reload the page to show updated list
     location.reload();

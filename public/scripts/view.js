@@ -1,3 +1,6 @@
+import { apiFetch } from "./apiClient.js";
+import { getUser, isAuthenticated } from "./authState.js";
+
 // Get post ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const postId = urlParams.get("id");
@@ -6,18 +9,11 @@ if (!postId) {
   window.location.href = "/";
 }
 
-let currentUser = null;
-
 // Check auth status on load
 async function checkAuthForReply() {
   try {
-    const response = await fetch("/auth/status", {
-      credentials: "include",
-    });
-    const data = await response.json();
-
-    if (data.authenticated) {
-      currentUser = data.user;
+    if (isAuthenticated()) {
+      const currentUser = getUser();
       showReplyForm();
     } else {
       showAuthPrompt();
@@ -124,19 +120,17 @@ async function handleReplySubmit(e) {
     const message = document.getElementById("message").value;
     const contactEmail = document.getElementById("replyEmail").value;
 
-    const response = await fetch(`/api/replies/${postId}`, {
+    const response = await apiFetch(`/api/replies/${postId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({
         message,
         contactEmail,
       }),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
       if (response.status === 401) {
         throw new Error("You must be signed in to reply. Please refresh and sign in.");
       }

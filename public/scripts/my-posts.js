@@ -1,36 +1,34 @@
+/**
+ * My Posts page
+ * Uses API client for authenticated requests
+ */
+
+import { apiJson, apiFetch } from "./apiClient.js";
+import { isAuthenticated } from "./authState.js";
+
 // Load user's posts
 async function loadMyPosts() {
   const content = document.getElementById("myPostsContent");
 
   try {
     // Check authentication
-    const authResponse = await fetch("/auth/status", {
-      credentials: "include",
-    });
-    const authData = await authResponse.json();
-
-    if (!authData.authenticated) {
+    if (!isAuthenticated()) {
       showAuthRequired();
       return;
     }
 
     // Fetch user's posts
-    const response = await fetch("/api/posts/my-posts", {
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        showAuthRequired();
-        return;
-      }
-      throw new Error("Failed to load posts");
-    }
-
-    const data = await response.json();
+    const data = await apiJson("/api/posts/my-posts");
     displayMyPosts(data.posts);
   } catch (error) {
     console.error("Error loading posts:", error);
+
+    // Check if error is due to auth failure
+    if (!isAuthenticated()) {
+      showAuthRequired();
+      return;
+    }
+
     content.innerHTML = `
       <div class="error-message">
         <p>Failed to load your posts. Please try again later.</p>
@@ -179,14 +177,9 @@ function confirmDelete(postId) {
 
 async function deletePost(postId) {
   try {
-    const response = await fetch(`/api/posts/${postId}`, {
+    await apiFetch(`/api/posts/${postId}`, {
       method: "DELETE",
-      credentials: "include",
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete post");
-    }
 
     // Reload the page to show updated list
     location.reload();

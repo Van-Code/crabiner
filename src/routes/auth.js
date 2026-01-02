@@ -244,9 +244,15 @@ router.post("/refresh", async (req, res, next) => {
       );
     }
 
-    // Return new tokens
+    // Return new tokens and user info
     res.json({
       accessToken,
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        avatarUrl: result.user.avatarUrl,
+      },
       // Only return refresh token in body if not using cookies
       ...(fromCookie ? {} : { refreshToken: result.refreshToken }),
     });

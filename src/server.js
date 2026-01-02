@@ -9,7 +9,6 @@ import passport from "passport";
 // Config
 import "./config/env.js";
 import { initDatabase } from "./config/database.js";
-import { initEmail } from "./config/email.js";
 import { initPassport } from "./config/passport.js";
 
 // Middleware
@@ -20,11 +19,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 // Routes
 import postsRouter from "./routes/posts.js";
 import repliesRouter from "./routes/replies.js";
-import managementRouter from "./routes/management.js";
 import inboxRouter from "./routes/inbox.js";
-import verificationRouter from "./routes/verification.js";
-import posterVerificationRouter from "./routes/posterVerification.js";
-import moderationRouter from "./routes/moderation.js";
 import authRouter from "./routes/auth.js";
 import notificationsRouter from "./routes/notifications.js";
 import pushRouter from "./routes/push.js";
@@ -76,6 +71,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 // Static files first, always before rate limits and auth
 app.use(express.static(path.join(__dirname, "../public")));
 
@@ -89,6 +85,7 @@ app.use(cookieParser());
 // Global rate limiting only for API routes
 app.use("/api", globalRateLimiter);
 app.use("/auth", globalRateLimiter);
+
 // Input sanitization
 app.use(sanitizeInputs);
 
@@ -108,11 +105,7 @@ async function start() {
     app.use("/auth", authRouter);
     app.use("/api/posts", postsRouter);
     app.use("/api/replies", repliesRouter);
-    app.use("/api/manage", managementRouter);
     app.use("/api/inbox", inboxRouter);
-    app.use("/api/verification", verificationRouter);
-    app.use("/api/poster-verification", posterVerificationRouter);
-    app.use("/api/moderation", moderationRouter);
     app.use("/api/notifications", notificationsRouter);
     app.use("/api/push", pushRouter);
 
@@ -126,7 +119,6 @@ async function start() {
     });
 
     // User info endpoint - requires JWT auth
-    // Import requireAuth middleware
     const { requireAuth } = await import("./middleware/auth.js");
 
     app.get("/api/user", requireAuth, (req, res) => {
@@ -136,8 +128,6 @@ async function start() {
         email: req.user.email,
         emailVerified: req.user.emailVerified,
         avatarUrl: req.user.avatarUrl,
-        // Legacy field for compatibility
-        profilePicture: req.user.avatarUrl,
       });
     });
 
@@ -155,18 +145,10 @@ async function start() {
 
     console.log("✓ Routes registered");
 
-    // 4. Initialize email
-    try {
-      initEmail();
-      console.log("✓ Email initialized");
-    } catch (error) {
-      console.error("✗ Email initialization failed:", error.message);
-    }
-
-    // 5. Start cleanup job
+    // 4. Start cleanup job
     startCleanupJob();
 
-    // 6. Start server
+    // 5. Start server
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
       logger.info(`Environment: ${config.nodeEnv}`);

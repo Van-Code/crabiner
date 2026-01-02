@@ -1,309 +1,147 @@
+/**
+ * Post Service
+ * Handles post creation and management with UUID-based schema
+ */
+
 import { query } from "../config/database.js";
-import { generateToken, hashToken } from "../utils/crypto.js";
 import logger from "../utils/logger.js";
-import { checkContentSafety } from "./moderationService.js";
-import { nanoid } from "nanoid";
 
-export async function createPost(data, userId = null) {
-  const { location, title, description, expiresInDays, cityKey } = data;
-
-  // Check content safety BEFORE creating post
-  const concatText = title + " " + description;
-  const safetyCheck = await checkContentSafety(concatText);
-
-  if (safetyCheck.shouldBlock) {
-    throw new Error(
-      "Your post contains content that violates our community guidelines. Please review and try again."
-    );
+/**
+ * Create a new post (requires authentication)
+ * @param {Object} data - Post data { title, body, expiresInDays }
+ * @param {string} userId - User ID (required)
+ */
+export async function createPost(data, userId) {
+  if (!userId) {
+    throw new Error("Authentication required to create posts");
   }
 
-  // Round posted_at to nearest hour for privacy
-  const postedAt = new Date();
-  postedAt.setMinutes(0, 0, 0);
+  const { title, body, expiresInDays = 30 } = data;
 
   // Calculate expiry date
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
-  // Generate secure management token
-  const managementToken = generateToken();
-  const tokenHash = await hashToken(managementToken);
-
-  // Must be UNIQUE
-  const RELAY_EMAIL_DOMAIN =
-    process.env.RELAY_EMAIL_DOMAIN || "relay.crabiner.test";
-
-  const relayEmail = `post_${nanoid(12)}@${RELAY_EMAIL_DOMAIN}`;
-  // Generate session token for inbox access
-  const sessionToken = generateToken();
-  const contactEmailEncrypted = "enc.owner@email.com";
-
   const result = await query(
-    `INSERT INTO posts
-     (location, title, description, posted_at, expires_at,
-      management_token_hash, session_token, relay_email, contact_email_encrypted, city_key, user_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     RETURNING id, posted_at, expires_at`,
-    [
-      location,
-      title,
-      description,
-      postedAt,
-      expiresAt,
-      tokenHash,
-      sessionToken,
-      relayEmail,
-      contactEmailEncrypted,
-      cityKey,
-      userId,
-    ]
+    `INSERT INTO posts (user_id, title, body, expires_at, status)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, created_at, expires_at`,
+    [userId, title, body, expiresAt, "active"]
   );
 
   const postId = result.rows[0].id;
 
-  // Log flags if any (but still allow post)
-  if (!safetyCheck.isSafe && !safetyCheck.shouldBlock) {
-    await checkContentSafety(description, postId);
-    logger.warn("Post created with flags", {
-      postId,
-      flags: safetyCheck.flags.length,
-      requiresReview: safetyCheck.requiresReview,
-    });
-  }
-
-  logger.info("Post created", { postId });
+  logger.info("Post created", { postId, userId });
 
   return {
     id: postId,
-    managementToken,
-    sessionToken,
-    postedAt: result.rows[0].posted_at,
+    createdAt: result.rows[0].created_at,
     expiresAt: result.rows[0].expires_at,
-    needsReview: safetyCheck.requiresReview,
   };
 }
 
-export async function getPosts({
-  page = 1,
-  location = null,
-  cityKey = null,
-  limit = 20,
-}) {
+/**
+ * Get posts with pagination
+ * @param {Object} options - Query options { page, limit }
+ */
+export async function getPosts({ page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
-  const now = new Date();
 
-  let queryText = `
-    SELECT id, location, title, description, posted_at, expires_at, city_key
-    FROM posts
-    WHERE is_deleted = FALSE
-      AND expires_at > $1
-  `;
-
-  const params = [now];
-  let paramCount = 1;
-
-  // Prefer city_key filter over location text filter
-  if (cityKey) {
-    queryText += ` AND city_key = $${++paramCount}`;
-    params.push(cityKey);
-  } else if (location) {
-    queryText += ` AND location ILIKE $${++paramCount}`;
-    params.push(`%${location}%`);
-  }
-
-  queryText += `
-    ORDER BY posted_at DESC
-    LIMIT $${++paramCount} OFFSET $${++paramCount}
-  `;
-
-  params.push(limit, offset);
-
-  const result = await query(queryText, params);
+  const result = await query(
+    `SELECT
+      p.id,
+      p.title,
+      p.body,
+      p.created_at,
+      p.expires_at,
+      u.id as user_id,
+      u.name as user_name,
+      u.avatar_url as user_avatar
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.status = 'active'
+      AND p.expires_at > NOW()
+    ORDER BY p.created_at DESC
+    LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
 
   return {
     posts: result.rows,
     page,
     hasMore: result.rows.length === limit,
-    totalPages: result.rows.length / 20,
   };
 }
 
+/**
+ * Get post by ID
+ * @param {string} id - Post ID
+ */
 export async function getPostById(id) {
-  const now = new Date();
-
   const result = await query(
-    `SELECT id, location, title, description, posted_at, expires_at, city_key
-     FROM posts
-     WHERE id = $1
-       AND is_deleted = FALSE
-       AND expires_at > $2`,
-    [id, now]
-  );
-
-  return result.rows[0] || null;
-}
-
-export async function deletePost(id, token) {
-  const result = await query(
-    `SELECT management_token_hash FROM posts WHERE id = $1 AND is_deleted = FALSE`,
+    `SELECT
+      p.id,
+      p.title,
+      p.body,
+      p.created_at,
+      p.expires_at,
+      p.user_id,
+      u.name as user_name,
+      u.avatar_url as user_avatar
+    FROM posts p
+    JOIN users u ON u.id = p.user_id
+    WHERE p.id = $1
+      AND p.status = 'active'
+      AND p.expires_at > NOW()`,
     [id]
   );
 
-  if (result.rows.length === 0) {
-    throw new Error("Post not found");
-  }
-
-  const { verifyToken } = await import("../utils/crypto.js");
-  const isValid = await verifyToken(
-    token,
-    result.rows[0].management_token_hash
-  );
-
-  if (!isValid) {
-    throw new Error("Invalid management token");
-  }
-
-  await query(`UPDATE posts SET is_deleted = TRUE WHERE id = $1`, [id]);
-
-  logger.info("Post deleted", { postId: id });
-
-  return { success: true };
-}
-
-export async function getPostBySessionToken(sessionToken) {
-  const result = await query(
-    `SELECT id, location, title, description, posted_at, expires_at, city_key
-     FROM posts
-     WHERE session_token = $1 
-       AND is_deleted = FALSE 
-       AND expires_at > NOW()`,
-    [sessionToken]
-  );
-
   return result.rows[0] || null;
 }
 
-export async function searchPosts({
-  queryString,
-  page = 1,
-  location = null,
-  cityKey = null,
-  limit = 20,
-}) {
-  const offset = (page - 1) * limit;
-  const now = new Date();
-
-  let queryText = `
-    SELECT id, location, title, description, posted_at, expires_at, city_key,
-      ts_rank(to_tsvector('english', description || ' ' || location),
-      plainto_tsquery('english', $1)) as rank
-    FROM posts
-    WHERE is_deleted = FALSE
-      AND expires_at > $2
-  `;
-
-  const params = [queryString, now];
-  let paramCount = 2;
-
-  // Add search condition
-  if (queryString && queryString.trim()) {
-    queryText += ` AND (
-      to_tsvector('english', title) @@ plainto_tsquery('english', $1)
-      OR to_tsvector('english', description) @@ plainto_tsquery('english', $1)
-      OR to_tsvector('english', location) @@ plainto_tsquery('english', $1)
-      OR description ILIKE $${++paramCount}
-      OR location ILIKE $${paramCount}
-    )`;
-    params.push(`%${queryString}%`);
-  }
-
-  // Add city_key filter (preferred over location filter)
-  if (cityKey) {
-    queryText += ` AND city_key = $${++paramCount}`;
-    params.push(cityKey);
-  } else if (location) {
-    queryText += ` AND location ILIKE $${++paramCount}`;
-    params.push(`%${location}%`);
-  }
-
-  queryText += `
-    ORDER BY rank DESC, posted_at DESC
-    LIMIT $${++paramCount} OFFSET $${++paramCount}
-  `;
-
-  params.push(limit, offset);
-
-  const result = await query(queryText, params);
-
-  // Log search query
-  if (queryString && queryString.trim()) {
-    await query(
-      `INSERT INTO search_queries (query, results_count) VALUES ($1, $2)`,
-      [queryString, result.rows.length]
-    );
-  }
-
-  return {
-    posts: result.rows,
-    page,
-    hasMore: result.rows.length === limit,
-    queryString: queryString || null,
-  };
-}
-
-// Get popular searches
-export async function getPopularSearches(limit = 10) {
-  const result = await query(
-    `SELECT query, COUNT(*) as count
-     FROM search_queries
-     WHERE searched_at > NOW() - INTERVAL '7 days'
-     GROUP BY query
-     ORDER BY count DESC
-     LIMIT $1`,
-    [limit]
-  );
-
-  return result.rows;
-}
-
-// Get user's own posts
+/**
+ * Get user's own posts
+ * @param {string} userId - User ID
+ */
 export async function getUserPosts(userId) {
   const result = await query(
     `SELECT
       p.id,
-      p.location,
       p.title,
-      p.description,
-      p.posted_at,
+      p.body,
+      p.created_at,
       p.expires_at,
-      p.city_key,
-      p.session_token,
-      COUNT(DISTINCT r.id) FILTER (WHERE r.expires_at > NOW()) as reply_count,
-      COUNT(DISTINCT r.id) FILTER (WHERE r.is_read = FALSE AND r.expires_at > NOW()) as unread_count
+      p.status,
+      COUNT(DISTINCT r.id) FILTER (WHERE r.deleted_at IS NULL) as reply_count,
+      COUNT(DISTINCT r.id) FILTER (WHERE r.read_at IS NULL AND r.deleted_at IS NULL) as unread_count
     FROM posts p
-    LEFT JOIN replies r ON r.post_id = p.id AND r.is_from_poster = FALSE
+    LEFT JOIN replies r ON r.post_id = p.id AND r.to_user_id = p.user_id
     WHERE p.user_id = $1
-      AND p.is_deleted = FALSE
+      AND p.status = 'active'
       AND p.expires_at > NOW()
     GROUP BY p.id
-    ORDER BY p.posted_at DESC`,
+    ORDER BY p.created_at DESC`,
     [userId]
   );
 
   return result.rows;
 }
 
-// Delete user's post (only owner can delete)
+/**
+ * Delete user's post (only owner can delete)
+ * @param {string} userId - User ID
+ * @param {string} postId - Post ID
+ */
 export async function deleteUserPost(userId, postId) {
   const result = await query(
-    `SELECT id FROM posts WHERE id = $1 AND user_id = $2 AND is_deleted = FALSE`,
+    `SELECT id FROM posts WHERE id = $1 AND user_id = $2 AND status = 'active'`,
     [postId, userId]
   );
 
   if (result.rows.length === 0) {
     // Check if post exists at all
     const exists = await query(
-      `SELECT id FROM posts WHERE id = $1 AND is_deleted = FALSE`,
+      `SELECT id FROM posts WHERE id = $1 AND status = 'active'`,
       [postId]
     );
 
@@ -313,63 +151,9 @@ export async function deleteUserPost(userId, postId) {
     throw new Error("Unauthorized");
   }
 
-  await query(`UPDATE posts SET is_deleted = TRUE WHERE id = $1`, [postId]);
+  await query(`UPDATE posts SET status = 'deleted' WHERE id = $1`, [postId]);
 
   logger.info("Post deleted by user", { postId, userId });
 
   return { success: true };
-}
-
-// Save a post
-export async function savePost(userId, postId) {
-  try {
-    await query(
-      `INSERT INTO saved_posts (user_id, post_id)
-       VALUES ($1, $2)
-       ON CONFLICT (user_id, post_id) DO NOTHING`,
-      [userId, postId]
-    );
-
-    logger.info("Post saved", { userId, postId });
-    return { success: true };
-  } catch (error) {
-    logger.error("Error saving post:", error);
-    throw error;
-  }
-}
-
-// Unsave a post
-export async function unsavePost(userId, postId) {
-  await query(
-    `DELETE FROM saved_posts
-     WHERE user_id = $1 AND post_id = $2`,
-    [userId, postId]
-  );
-
-  logger.info("Post unsaved", { userId, postId });
-  return { success: true };
-}
-
-// Get user's saved posts
-export async function getSavedPosts(userId) {
-  const result = await query(
-    `SELECT
-      p.id,
-      p.location,
-      p.title,
-      p.description,
-      p.posted_at,
-      p.expires_at,
-      p.city_key,
-      sp.saved_at
-    FROM saved_posts sp
-    JOIN posts p ON p.id = sp.post_id
-    WHERE sp.user_id = $1
-      AND p.is_deleted = FALSE
-      AND p.expires_at > NOW()
-    ORDER BY sp.saved_at DESC`,
-    [userId]
-  );
-
-  return result.rows;
 }

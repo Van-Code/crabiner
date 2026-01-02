@@ -1,118 +1,72 @@
-import express from "express";
-import { body, query } from "express-validator";
-import { validateRequest } from "../utils/validation.js";
-import { requireAuth } from "../middleware/auth.js";
+/**
+ * Inbox Routes
+ * Handles authenticated user's inbox (replies they received)
+ */
 
+import express from "express";
+import { requireAuth } from "../middleware/auth.js";
 import {
-  getInboxMessages,
-  getUserInboxPosts,
-  markMessageAsRead,
-  deleteMessage,
+  getUserReplies,
+  getUnreadReplyCount,
+  markReplyAsRead,
+  deleteReply,
 } from "../services/replyService.js";
-import { getPostBySessionToken } from "../services/postService.js";
-import { posterReplyToMessage } from "../services/replyService.js";
 
 const router = express.Router();
 
-// Get authenticated user's inbox (all posts with replies)
+// Get authenticated user's inbox (all replies received)
 router.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+    const unreadOnly = req.query.unreadOnly === "true";
 
-    // Get all posts with replies
-    const posts = await getUserInboxPosts(userId);
+    const replies = await getUserReplies(userId, { limit, offset, unreadOnly });
+    const unreadCount = await getUnreadReplyCount(userId);
 
     res.json({
-      posts,
-      totalUnread: posts.reduce((sum, p) => sum + parseInt(p.unread_count), 0),
+      replies,
+      unreadCount,
+      limit,
+      offset,
     });
   } catch (error) {
     next(error);
   }
 });
 
-// Get user's inbox (requires session token - for anonymous posters)
-router.get("/:sessionToken", async (req, res, next) => {
+// Mark reply as read
+router.post("/:id/read", requireAuth, async (req, res, next) => {
   try {
-    const { sessionToken } = req.params;
+    const { id } = req.params;
+    const userId = req.user.id;
 
-    // Verify session and get post info
-    const post = await getPostBySessionToken(sessionToken);
+    const success = await markReplyAsRead(id, userId);
 
-    if (!post) {
-      return res.status(404).json({ error: "Invalid or expired session" });
+    if (!success) {
+      return res.status(404).json({
+        error: "Reply not found or already read",
+      });
     }
 
-    // Get messages
-    const messages = await getInboxMessages(sessionToken);
-
-    res.json({
-      post: {
-        id: post.id,
-        location: post.location,
-        description: post.description,
-        posted_at: post.posted_at,
-        expires_at: post.expires_at,
-      },
-      messages,
-      unreadCount: messages.filter((m) => !m.is_read).length,
-    });
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }
 });
 
-// Poster replies to a message
-router.post(
-  "/:sessionToken/messages/:replyId/reply",
-  body("message").trim().isLength({ min: 1, max: 1000 }),
-  validateRequest,
-  async (req, res, next) => {
-    try {
-      const { sessionToken, replyId } = req.params;
-      const { message } = req.body;
-
-      await posterReplyToMessage(sessionToken, replyId, message);
-
-      res.json({ message: "Reply sent successfully" });
-    } catch (error) {
-      if (error.message.includes("Unauthorized")) {
-        return res.status(403).json({ error: error.message });
-      }
-      next(error);
-    }
-  }
-);
-
-// Mark message as read
-router.patch(
-  "/:sessionToken/messages/:messageId/read",
-  async (req, res, next) => {
-    try {
-      const { sessionToken, messageId } = req.params;
-
-      await markMessageAsRead(messageId, sessionToken);
-
-      res.json({ message: "Marked as read" });
-    } catch (error) {
-      if (error.message === "Message not found or unauthorized") {
-        return res.status(404).json({ error: error.message });
-      }
-      next(error);
-    }
-  }
-);
-
-// Delete message
-router.delete("/:sessionToken/messages/:messageId", async (req, res, next) => {
+// Delete reply
+router.delete("/:id", requireAuth, async (req, res, next) => {
   try {
-    const { sessionToken, messageId } = req.params;
+    const { id } = req.params;
+    const userId = req.user.id;
 
-    await deleteMessage(messageId, sessionToken);
+    await deleteReply(id, userId);
 
-    res.json({ message: "Message deleted" });
+    res.json({ success: true, message: "Reply deleted" });
   } catch (error) {
-    if (error.message === "Message not found or unauthorized") {
+    if (error.message === "Reply not found or already deleted") {
       return res.status(404).json({ error: error.message });
     }
     next(error);

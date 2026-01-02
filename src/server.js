@@ -26,6 +26,8 @@ import verificationRouter from "./routes/verification.js";
 import posterVerificationRouter from "./routes/posterVerification.js";
 import moderationRouter from "./routes/moderation.js";
 import authRouter from "./routes/auth.js";
+import notificationsRouter from "./routes/notifications.js";
+import pushRouter from "./routes/push.js";
 
 // Services
 import { startCleanupJob } from "./services/cleanupService.js";
@@ -111,6 +113,8 @@ async function start() {
     app.use("/api/verification", verificationRouter);
     app.use("/api/poster-verification", posterVerificationRouter);
     app.use("/api/moderation", moderationRouter);
+    app.use("/api/notifications", notificationsRouter);
+    app.use("/api/push", pushRouter);
 
     // Health check
     app.get("/api/health", (req, res) => {

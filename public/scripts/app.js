@@ -219,12 +219,7 @@ async function loadPostsForMap() {
       const params = new URLSearchParams(baseParams);
       params.set("page", String(page));
 
-      const response = await fetch(`${endpoint}?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to load posts for map view");
-      }
-
-      const data = await response.json();
+      const data = await apiJson(`${endpoint}?${params}`);
 
       if (Array.isArray(data.posts)) {
         collected.push(...data.posts);
@@ -406,8 +401,7 @@ function updateURL() {
 async function loadCityCounts() {
   try {
     // Fetch counts from API
-    const response = await fetch("/api/posts/city-counts");
-    const data = await response.json();
+    const data = await apiJson("/api/posts/city-counts");
 
     // Create a map of city_key to count
     const countsMap = {};
@@ -472,8 +466,7 @@ async function loadCityCounts() {
 
 async function loadPopularSearches() {
   try {
-    const response = await fetch("/api/posts/popular-searches");
-    const data = await response.json();
+    const data = await apiJson("/api/posts/popular-searches");
 
     if (data.searches.length > 0) {
       const container = document.getElementById("popularSearchesList");
@@ -524,13 +517,7 @@ async function loadPosts() {
 
     const finalUrl = `${endpoint}?${params}`;
 
-    const response = await fetch(finalUrl);
-
-    if (!response.ok) {
-      throw new Error("Failed to load posts");
-    }
-
-    const data = await response.json();
+    const data = await apiJson(finalUrl);
 
     displayPosts(data.posts);
     updatePagination(data.hasMore);

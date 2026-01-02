@@ -12,7 +12,7 @@ async function checkAuth() {
       authSection.innerHTML = `
           <a href="/inbox.html" class="nav-link">Inbox</a>
           <div class="user-menu">
-            <img src="${data.user.profilePicture || "/default-avatar.png"}"
+            <img src="${data.user.avatarUrl || "/default-avatar.png"}"
                  alt="${data.user.name}"
                  class="user-avatar">
             <span class="user-name">${data.user.name}</span>

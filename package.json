@@ -6,16 +6,15 @@
     "start": "node src/server.js",
     "dev": "env-cmd -f .env.local node src/server.js",
     "dev:test": "DISABLE_RATE_LIMIT=true env-cmd -f .env.local node src/server.js",
-    "db:seed:local": "env-cmd -f .env.local node seed_posts.js",
+    "db:reset": "psql -U postgres -c 'DROP DATABASE IF EXISTS crabiner;' && psql -U postgres -c 'CREATE DATABASE crabiner;'",
+    "db:schema": "psql $DATABASE_URL < db/schema.sql",
+    "db:seed": "node db/seed.js",
+    "db:setup": "npm run db:reset && npm run db:schema && npm run db:seed",
     "cleanup": "node src/services/cleanupService.js",
     "test": "DISABLE_RATE_LIMIT=true node --test tests/**/*.test.js",
+    "test:notifications": "DISABLE_RATE_LIMIT=true node --test tests/notifications.test.js",
     "test:token-auth": "DISABLE_RATE_LIMIT=true node --test tests/token-auth.test.js",
-    "test:auth": "DISABLE_RATE_LIMIT=true node --test tests/auth-flow.test.js",
-    "test:posts": "DISABLE_RATE_LIMIT=true node --test tests/post-lifecycle.test.js",
-    "test:conversations": "DISABLE_RATE_LIMIT=true node --test tests/conversations.test.js",
-    "test:inbox": "DISABLE_RATE_LIMIT=true node --test tests/inbox-notifications.test.js",
-    "test:ui": "DISABLE_RATE_LIMIT=true node --test tests/ui-validation.test.js",
-    "test:legacy": "DISABLE_RATE_LIMIT=true node tests/posts.test.js && DISABLE_RATE_LIMIT=true node --test tests/auth-replies.test.js"
+    "test:auth": "DISABLE_RATE_LIMIT=true node --test tests/auth-flow.test.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

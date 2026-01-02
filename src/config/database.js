@@ -1,13 +1,12 @@
 import pkg from "pg";
 const { Pool } = pkg;
-import { config } from "./env.js";
 import logger from "../utils/logger.js";
 
 let pool;
 
 export function initDatabase() {
   pool = new Pool({
-    connectionString: config.database.url,
+    connectionString: process.env.DATABASE_URL,
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,

@@ -62,8 +62,6 @@ export async function requireAuth(req, res, next) {
       emailVerified: user.email_verified,
       name: user.name,
       avatarUrl: user.avatar_url,
-      // Keep legacy fields for compatibility during migration
-      profile_picture: user.avatar_url,
     };
 
     next();
@@ -108,7 +106,6 @@ export async function optionalAuth(req, res, next) {
           emailVerified: user.email_verified,
           name: user.name,
           avatarUrl: user.avatar_url,
-          profile_picture: user.avatar_url,
         };
       }
     } catch (error) {

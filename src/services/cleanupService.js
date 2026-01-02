@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { query } from "../config/database.js";
+import { initDatabase, query } from "../config/database.js";
 import { config } from "../config/env.js";
 import logger from "../utils/logger.js";
 import { cleanupExpiredCodes } from "./verificationService.js";
@@ -40,6 +40,7 @@ async function cleanupExpiredPosts() {
 }
 // Manual cleanup (can be run via npm run cleanup)
 if (import.meta.url === `file://${process.argv[1]}`) {
+  await initDatabase();
   await cleanupExpiredPosts();
   process.exit(0);
 }

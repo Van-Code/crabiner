@@ -1,3 +1,6 @@
+import { apiJson, apiFetch } from "./apiClient.js";
+import { isAuthenticated } from "./authState.js";
+
 // Get session token from URL if viewing a specific post's inbox
 const urlParams = new URLSearchParams(window.location.search);
 const sessionToken = urlParams.get("session");
@@ -16,33 +19,23 @@ async function loadInboxList() {
 
   try {
     // Check if user is authenticated
-    const authResponse = await fetch("/auth/status", {
-      credentials: "include",
-    });
-    const authData = await authResponse.json();
-
-    if (!authData.authenticated) {
+    if (!isAuthenticated()) {
       showAuthRequired();
       return;
     }
 
-    // Load inbox posts
-    const response = await fetch("/api/inbox", {
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        showAuthRequired();
-        return;
-      }
-      throw new Error("Failed to load inbox");
-    }
-
-    const data = await response.json();
+    // Load inbox posts using API client
+    const data = await apiJson("/api/inbox");
     displayInboxList(data);
   } catch (error) {
     console.error("Inbox load error:", error);
+
+    // Check if auth failed
+    if (!isAuthenticated()) {
+      showAuthRequired();
+      return;
+    }
+
     messages.innerHTML = `
       <div class="error-message">
         <p>Failed to load inbox. Please try again later.</p>
@@ -265,7 +258,7 @@ if (posterReplyForm) {
     const message = document.getElementById("posterReplyMessage").value;
 
     try {
-      const response = await fetch(
+      await apiFetch(
         `/api/inbox/${sessionToken}/messages/${replyId}/reply`,
         {
           method: "POST",
@@ -274,14 +267,10 @@ if (posterReplyForm) {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to send reply");
-      }
-
       // Reload inbox
       location.reload();
     } catch (error) {
-      alert(error.message);
+      alert(error.message || "Failed to send reply");
     }
   });
 }
